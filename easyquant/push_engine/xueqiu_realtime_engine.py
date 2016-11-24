@@ -4,18 +4,19 @@ import easyquotation
 import time
 
 from .base_engine import BaseEngine
-
+from easyquant.event_engine import Event
 
 class XueqiuRealtimeEngine(BaseEngine):
     """雪球分时行情推送引擎"""
     EventType = 'realtime'
+    PushInterval = 1
 
     def init(self):
         self.source = easyquotation.use('xq')
         self.pause = 0.001
 
     def fetch_quotation(self):
-        return self.source.get_realtime_data('XXXXXXX')
+        return self.source.get_realtime_data(self.stocks)
 
     def push_quotation(self):
         while self.is_active:

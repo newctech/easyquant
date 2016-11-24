@@ -59,12 +59,22 @@ class Strategy(StrategyTemplate):
         """
         # 使用 self.user 来操作账户，用法同 easytrader 用法
         # 使用 self.log.info('message') 来打印你所需要的 log
-        print('demo1 的 log 使用自定义 log 的方式记录在 demo1.log')
+        #print('demo1 的 log 使用自定义 log 的方式记录在 demo1.log')
         self.log.info('\n\n策略1触发')
-        self.log.info('行情数据: 万科价格: %s' % event.data['000002'])
-        self.log.info('检查持仓')
-        self.log.info(self.user.balance)
-        self.log.info('\n')
+        if event.event_type == 'pankou':
+            self.log.info('xueqiu_pankou: %s' % event.data)
+        elif event.event_type == 'detail':
+            self.log.info('xueqiu_detail: %s' % event.data)
+        elif event.event_type == 'realtime':
+            self.log.info('xueqiu_realtime: %s' % event.data)
+        elif event.event_type == 'kdata':
+            self.log.info('xueqiu_kdata: %s' % event.data)
+        elif event.event_type == 'general':
+            self.log.info('xueqiu_general: %s' % event.data)
+        #self.log.info('行情数据: 万科价格: %s' % event.data['000002'])
+        #self.log.info('检查持仓')
+        #self.log.info(self.user.balance)
+        #self.log.info('\n')
 
     def clock(self, event):
         """在交易时间会定时推送 clock 事件

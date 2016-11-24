@@ -4,18 +4,19 @@ import easyquotation
 import time
 
 from .base_engine import BaseEngine
-
+from easyquant.event_engine import Event
 
 class XueqiuGeneralEngine(BaseEngine):
     """雪球股票概要行情推送引擎"""
     EventType = 'general'
+    PushInterval = 120
 
     def init(self):
         self.source = easyquotation.use('xq')
         self.pause = 0.001
 
     def fetch_quotation(self):
-        return self.source.get_general_data('XXXXXXX')
+        return self.source.get_general_data(self.stocks)
 
     def push_quotation(self):
         while self.is_active:

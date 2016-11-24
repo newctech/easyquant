@@ -47,6 +47,7 @@ class MainEngine:
         else:
             self.user = None
             self.log.info('选择了无交易模式')
+        self.stocks = self.user.account_config['stocks']
 
         self.event_engine = EventEngine()
         self.clock_engine = ClockEngine(self.event_engine, tzinfo)
@@ -63,7 +64,7 @@ class MainEngine:
                 raise ValueError("行情引擎 EventType 重复:" + types)
         self.quotation_engines = []
         for quotation_engine in quotation_engines:
-            self.quotation_engines.append(quotation_engine(self.event_engine, self.clock_engine))
+            self.quotation_engines.append(quotation_engine(self.event_engine, self.clock_engine, self.stocks))
 
         # 保存读取的策略类
         self.strategies = OrderedDict()

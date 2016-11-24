@@ -1,5 +1,6 @@
 {
   "account": "手机号",
   "password": "加密后的密码",
-  "portfolio_code": "组合代码(例:ZH818559)"
+  "portfolio_code": "组合代码(例:ZH818559)",
+  "stocks": "股票代码（例:600848 或SH000001)"
 }
