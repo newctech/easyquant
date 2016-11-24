@@ -2,20 +2,24 @@
 
 import easyquotation
 import time
+import datetime
 
 from .base_engine import BaseEngine
 
 
-class XueqiuPankouEngine(BaseEngine):
-    """雪球盘口行情推送引擎"""
-    EventType = 'pankou'
+class XueqiuKdataEngine(BaseEngine):
+    """雪球k线行情推送引擎"""
+    EventType = 'kdata'
 
     def init(self):
         self.source = easyquotation.use('xq')
         self.pause = 0.001
 
     def fetch_quotation(self):
-        return self.source.get_pankou_data('XXXXXXX')
+        yesterday = datetime.datetime.now() + datetime.timedelta(days=-1)
+        yest_time = yesterday.strftime('%Y-%m-%d') + ' 15:00:00'
+        today_time = time.strftime('%Y-%m-%d',time.localtime(time.time())) + ' 15:00:00'
+        return self.source.get_k_data('XXXXXXX', yest_time, today_time)
 
     def push_quotation(self):
         while self.is_active:

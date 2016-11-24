@@ -6,16 +6,16 @@ import time
 from .base_engine import BaseEngine
 
 
-class XueqiuPankouEngine(BaseEngine):
-    """雪球盘口行情推送引擎"""
-    EventType = 'pankou'
+class XueqiuGeneralEngine(BaseEngine):
+    """雪球股票概要行情推送引擎"""
+    EventType = 'general'
 
     def init(self):
         self.source = easyquotation.use('xq')
         self.pause = 0.001
 
     def fetch_quotation(self):
-        return self.source.get_pankou_data('XXXXXXX')
+        return self.source.get_general_data('XXXXXXX')
 
     def push_quotation(self):
         while self.is_active:

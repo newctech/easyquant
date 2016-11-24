@@ -6,16 +6,16 @@ import time
 from .base_engine import BaseEngine
 
 
-class XueqiuPankouEngine(BaseEngine):
-    """雪球盘口行情推送引擎"""
-    EventType = 'pankou'
+class XueqiuDetailEngine(BaseEngine):
+    """雪球分笔行情推送引擎"""
+    EventType = 'detail'
 
     def init(self):
         self.source = easyquotation.use('xq')
         self.pause = 0.001
 
     def fetch_quotation(self):
-        return self.source.get_pankou_data('XXXXXXX')
+        return self.source.get_detail_data('XXXXXXX')
 
     def push_quotation(self):
         while self.is_active:
@@ -24,8 +24,8 @@ class XueqiuPankouEngine(BaseEngine):
             except:
                 self.wait()
                 continue
-            for response in response_lists:
-                event = Event(event_type=self.EventType, data=response)
+            for index in range(len(response_lists)):
+                event = Event(event_type=self.EventType, data=response_lists[-index - 1])
                 self.event_engine.put(event)
                 time.sleep(self.pause)
             self.wait()
