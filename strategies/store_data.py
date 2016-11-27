@@ -1,8 +1,10 @@
+import os
 import time
 import datetime as dt
 from dateutil import tz
 #from easyquant import DefaultLogHandler
 from easyquant import StrategyTemplate
+import easyquotation
 
 
 class Strategy(StrategyTemplate):
@@ -19,10 +21,16 @@ class Strategy(StrategyTemplate):
         moment = dt.time(14, 56, 30, tzinfo=tz.tzlocal())
         self.clock_engine.register_moment(clock_type, moment)
 
+        # 注册时钟事件
+        clock_type = "closed" #存储K线数据
+        moment = dt.time(15, 10, 0, tzinfo=tz.tzlocal())
+        self.clock_engine.register_moment(clock_type, moment)
+
         # 注册时钟间隔事件, 不在交易阶段也会触发, clock_type == minute_interval
         minute_interval = 1.5
         self.clock_engine.register_interval(minute_interval, trading=False)
 
+        self.source = easyquotation.use('xq')
         self.symbol = 'SH601211'
 
     def strategy(self, event):
@@ -94,6 +102,17 @@ class Strategy(StrategyTemplate):
         elif event.data.clock_event == 'close':
             # 收市了
             self.log.info('StoreData_Close')
+        elif event.data.clock_event == 'closed':
+            # 收市更新数据
+            self.log.info('StoreData_Closed')
+            if os.path.exists(self.kdata_file):
+                k_list = self.source.get_k_data(self.stocks)
+                for k in k_list:
+                    self.kdata_write_hdf5(k, self.symbol)
+            else:
+                kall_lists = self.source.get_kall_data(self.stocks)
+                for kall in kall_lists:
+                    self.kdata_write_hdf5(kall, self.symbol)
         elif event.data.clock_event == 5:
             # 5 分钟的 clock
             self.log.info("StoreData_5min")

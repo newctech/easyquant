@@ -85,13 +85,17 @@ class StrategyTemplate:
         pass
 
     def pankou_write_hdf5(self, pankou):
-        with pd.HDFStore(self.pankou_file) as store:
-            timestamp = str(int(time.mktime(time.strptime(pankou['time'], '%b %d, %Y %H:%M:%S %p')) * 1000))
-            pankou_df = pd.DataFrame([pankou], index=[timestamp],
-                                  columns=['symbol', 'time', 'current', 'buypct', 'sellpct', 'diff', 'ratio', 'bp1',
-                                           'bc1', 'bp2', 'bc2', 'bp3', 'bc3', 'bp4', 'bc4', 'bp5', 'bc5', 'sp1', 'sc1',
-                                           'sp2', 'sc2', 'sp3', 'sc3', 'sp4', 'sc4', 'sp5', 'sc5'])
-            store.append(pankou['symbol'], pankou_df, format="table", append=True)
+        timestamp = str(int(time.mktime(time.strptime(pankou['time'], '%b %d, %Y %H:%M:%S %p')) * 1000))
+        pankou_df = pd.DataFrame([pankou], index=[timestamp],
+                                 columns=['symbol', 'time', 'current', 'buypct', 'sellpct', 'diff', 'ratio', 'bp1',
+                                          'bc1', 'bp2', 'bc2', 'bp3', 'bc3', 'bp4', 'bc4', 'bp5', 'bc5', 'sp1', 'sc1',
+                                          'sp2', 'sc2', 'sp3', 'sc3', 'sp4', 'sc4', 'sp5', 'sc5'])
+        if os.path.exists(self.pankou_file):
+            with pd.HDFStore(self.pankou_file) as store:
+                store.append(pankou['symbol'], pankou_df, format="table", append=True)
+        else:
+            with pd.HDFStore(self.pankou_file) as store:
+                store.put(pankou['symbol'], pankou_df, format="table")
 
     def pankou_read_hdf5(self, symbol):
         with pd.HDFStore(self.pankou_file) as store:
@@ -99,10 +103,14 @@ class StrategyTemplate:
         return pankou_df
 
     def detail_write_hdf5(self, detail):
-        with pd.HDFStore(self.detail_file) as store:
-            detail_df = pd.DataFrame([detail], index=[str(detail['t'])],
-                                     columns=['s', 'ts', 'v', 'type', 'avgPrice', 'c', 'chg', 'pct', 'bp1', 'sp1', 'ttv'])
-            store.append(detail['s'], detail_df, format="table", append=True)
+        detail_df = pd.DataFrame([detail], index=[str(detail['t'])],
+                                 columns=['s', 'ts', 'v', 'type', 'avgPrice', 'c', 'chg', 'pct', 'bp1', 'sp1', 'ttv'])
+        if os.path.exists(self.detail_file):
+            with pd.HDFStore(self.detail_file) as store:
+                store.append(detail['s'], detail_df, format="table", append=True)
+        else:
+            with pd.HDFStore(self.detail_file) as store:
+                store.put(detail['s'], detail_df, format="table")
 
     def detail_read_hdf5(self, symbol):
         with pd.HDFStore(self.detail_file) as store:
@@ -110,11 +118,15 @@ class StrategyTemplate:
         return detail_df
 
     def realtime_write_hdf5(self, realtime, symbol):
-        with pd.HDFStore(self.realtime_file) as store:
-            timestamp = str(int(time.mktime(time.strptime(realtime['time'], '%a %b %d %H:%M:%S %z %Y')) * 1000))
-            realtime_df = pd.DataFrame([realtime], index=[timestamp],
-                                  columns=['time','avg_price','current','volume'])
-            store.append(symbol, realtime_df, format="table", append=True)
+        timestamp = str(int(time.mktime(time.strptime(realtime['time'], '%a %b %d %H:%M:%S %z %Y')) * 1000))
+        realtime_df = pd.DataFrame([realtime], index=[timestamp],
+                                   columns=['time', 'avg_price', 'current', 'volume'])
+        if os.path.exists(self.realtime_file):
+            with pd.HDFStore(self.realtime_file) as store:
+                store.append(symbol, realtime_df, format="table", append=True)
+        else:
+            with pd.HDFStore(self.realtime_file) as store:
+                store.put(symbol, realtime_df, format="table")
 
     def realtime_read_hdf5(self, symbol):
         with pd.HDFStore(self.realtime_file) as store:
@@ -122,29 +134,41 @@ class StrategyTemplate:
         return realtime_df
 
     def kdata_write_hdf5(self, kdata, symbol):
-        with pd.HDFStore(self.kdata_file) as store:
-            timestamp = str(int(time.mktime(time.strptime(kdata['time'], '%a %b %d %H:%M:%S %z %Y')) * 1000))
-            kdata_df = pd.DataFrame([kdata], index=[timestamp],
-                                  columns=['time','open','close','high','low','chg','percent','volume','turnrate',
-                                           'ma5','ma10','ma20','ma30','macd','dif','dea'])
-            store.append(symbol, kdata_df, format="table", append=True)
+        timestamp = str(int(time.mktime(time.strptime(kdata['time'], '%a %b %d %H:%M:%S %z %Y')) * 1000))
+        kdata_df = pd.DataFrame([kdata], index=[timestamp],
+                                columns=['time', 'open', 'close', 'high', 'low', 'chg', 'percent', 'volume', 'turnrate',
+                                         'ma5', 'ma10', 'ma20', 'ma30', 'macd', 'dif', 'dea'])
+        if os.path.exists(self.kdata_file):
+            with pd.HDFStore(self.kdata_file) as store:
+                store.append(symbol, kdata_df, format="table", append=True)
+        else:
+            with pd.HDFStore(self.kdata_file) as store:
+                store.put(symbol, kdata_df, format="table")
 
-    def kdata_read_hdf5(self, symbol):
+    def kldata_read_hdf5(self, symbol):
         with pd.HDFStore(self.kdata_file) as store:
             kdata_df = store.select(symbol)
         return kdata_df
 
     def general_write_hdf5(self, general):
-        with pd.HDFStore(self.general_file) as store:
-            timestamp = str(int(time.mktime(time.strptime(general['time'], '%a %b %d %H:%M:%S %z %Y')) * 1000))
-            general_df = pd.DataFrame([general], index=[timestamp],
-                                  columns=['symbol','time','open','current','percentage','high','low','turnover_rate',
-                                           'volume','amount','marketCapital','totalShares','float_market_capital',
-                                           'float_shares','last_close','amplitude','rise_stop','fall_stop','high52week',
-                                           'low52week','pe_ttm','pe_lyr','pb','psr','net_assets','dividend','yield',
-                                           'change','eps','type','issue_type','redeem_type','par_value','updateAt',
+        timestamp = str(int(time.mktime(time.strptime(general['time'], '%a %b %d %H:%M:%S %z %Y')) * 1000))
+        general_df = pd.DataFrame([general], index=[timestamp],
+                                  columns=['symbol', 'time', 'open', 'current', 'percentage', 'high', 'low',
+                                           'turnover_rate',
+                                           'volume', 'amount', 'marketCapital', 'totalShares', 'float_market_capital',
+                                           'float_shares', 'last_close', 'amplitude', 'rise_stop', 'fall_stop',
+                                           'high52week',
+                                           'low52week', 'pe_ttm', 'pe_lyr', 'pb', 'psr', 'net_assets', 'dividend',
+                                           'yield',
+                                           'change', 'eps', 'type', 'issue_type', 'redeem_type', 'par_value',
+                                           'updateAt',
                                            'volumeAverage'])
-            store.append(general['symbol'], general_df, format="table", append=True)
+        if os.path.exists(self.general_file):
+            with pd.HDFStore(self.general_file) as store:
+                store.append(general['symbol'], general_df, format="table", append=True)
+        else:
+            with pd.HDFStore(self.general_file) as store:
+                store.put(general['symbol'], general_df, format="table")
 
     def general_read_hdf5(self, symbol):
         with pd.HDFStore(self.general_file) as store:
