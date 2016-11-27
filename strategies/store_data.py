@@ -6,7 +6,7 @@ from easyquant import StrategyTemplate
 
 
 class Strategy(StrategyTemplate):
-    name = 'storedata'
+    name = '数据存储策略'
 
     def init(self):
         # 通过下面的方式来获取时间戳
@@ -62,21 +62,21 @@ class Strategy(StrategyTemplate):
         # 使用 self.user 来操作账户，用法同 easytrader 用法
         # 使用 self.log.info('message') 来打印你所需要的 log
         #print('demo1 的 log 使用自定义 log 的方式记录在 demo1.log')
-        self.log.info('\n\nstoredata触发')
+        self.log.info('数据存储策略触发')
         if event.event_type == 'pankou':
-            self.log.info('xueqiu_pankou: %s' % event.data)
+            self.log.info('存储盘口: %s' % event.data)
             self.pankou_write_hdf5(event.data)
         elif event.event_type == 'detail':
-            self.log.info('xueqiu_detail: %s' % event.data)
+            self.log.info('存储分笔: %s' % event.data)
             self.detail_write_hdf5(event.data)
         elif event.event_type == 'realtime':
-            self.log.info('xueqiu_realtime: %s' % event.data)
+            self.log.info('存储分时: %s' % event.data)
             self.realtime_write_hdf5(event.data, self.symbol)
-        elif event.event_type == 'kdata':
-            self.log.info('xueqiu_kdata: %s' % event.data)
-            self.kdata_write_hdf5(event.data, self.symbol)
+        #elif event.event_type == 'kdata':
+        #    self.log.info('xueqiu_kdata: %s' % event.data)
+        #    self.kdata_write_hdf5(event.data, self.symbol)
         elif event.event_type == 'general':
-            self.log.info('xueqiu_general: %s' % event.data)
+            self.log.info('存储概要: %s' % event.data)
             self.general_write_hdf5(event.data)
         #self.log.info('行情数据: 万科价格: %s' % event.data['000002'])
         #self.log.info('检查持仓')
@@ -90,13 +90,13 @@ class Strategy(StrategyTemplate):
         """
         if event.data.clock_event == 'open':
             # 开市了
-            self.log.info('open')
+            self.log.info('存储策略开市')
         elif event.data.clock_event == 'close':
             # 收市了
-            self.log.info('close')
+            self.log.info('存储策略闭市')
         elif event.data.clock_event == 5:
             # 5 分钟的 clock
-            self.log.info("5分钟")
+            self.log.info("存储策略5分钟")
 
     def log_handler(self):
         """自定义 log 记录方式"""

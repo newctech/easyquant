@@ -1,6 +1,7 @@
 # coding:utf-8
 import sys
 import os
+import time
 import traceback
 import pandas as pd
 
@@ -99,7 +100,7 @@ class StrategyTemplate:
 
     def detail_write_hdf5(self, detail):
         with pd.HDFStore(self.detail_file) as store:
-            detail_df = pd.DataFrame([detail], index=detail['t'],
+            detail_df = pd.DataFrame([detail], index=[str(detail['t'])],
                                      columns=['s', 'ts', 'v', 'type', 'avgPrice', 'c', 'chg', 'pct', 'bp1', 'sp1', 'ttv'])
             store.append(detail['s'], detail_df, format="table", append=True)
 
