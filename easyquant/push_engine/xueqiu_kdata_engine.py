@@ -17,10 +17,7 @@ class XueqiuKdataEngine(BaseEngine):
         self.pause = 0.001
 
     def fetch_quotation(self):
-        yesterday = datetime.datetime.now() + datetime.timedelta(days=-1)
-        yest_time = yesterday.strftime('%Y-%m-%d') + ' 15:00:00'
-        today_time = time.strftime('%Y-%m-%d',time.localtime(time.time())) + ' 15:00:00'
-        return self.source.get_k_data(self.stocks, yest_time, today_time)
+        return self.source.get_k_data(self.stocks)
 
     def push_quotation(self):
         while self.is_active:
