@@ -2,12 +2,17 @@ from easyquant import StrategyTemplate
 
 
 class Strategy(StrategyTemplate):
-    name = '策略2'
+    name = 'Strategy2'
 
     def strategy(self, event):
-        self.log.info('策略2触发')
+        self.log.info('Strategy2')
         #self.log.info('行情数据: 华宝油气 %s' % event.data['162411'])
         #self.log.info('检查持仓')
         #self.log.info(self.user.balance)
         #self.log.info('\n')
 
+
+    def log_handler(self):
+        """自定义 log 记录方式"""
+        log = self.name + '.log'
+        return DefaultLogHandler(self.name, log_type='stdout', filepath=log)

@@ -6,7 +6,7 @@ from easyquant import StrategyTemplate
 
 
 class Strategy(StrategyTemplate):
-    name = '策略1'
+    name = 'Strategy1'
 
     def init(self):
         # 通过下面的方式来获取时间戳
@@ -15,7 +15,7 @@ class Strategy(StrategyTemplate):
         now = time.time()
 
         # 注册时钟事件
-        clock_type = "盘尾"
+        clock_type = "closing" #尾盘
         moment = dt.time(14, 56, 30, tzinfo=tz.tzlocal())
         self.clock_engine.register_moment(clock_type, moment)
 
@@ -60,17 +60,17 @@ class Strategy(StrategyTemplate):
         # 使用 self.user 来操作账户，用法同 easytrader 用法
         # 使用 self.log.info('message') 来打印你所需要的 log
         #print('demo1 的 log 使用自定义 log 的方式记录在 demo1.log')
-        self.log.info('策略1触发')
+        #self.log.info('策略1触发')
         if event.event_type == 'pankou':
-            self.log.info('策略1盘口: %s' % event.data)
+            self.log.info('Strategy1_Pankou: %s' % event.data)
         elif event.event_type == 'detail':
-            self.log.info('策略1分笔: %s' % event.data)
+            self.log.info('Strategy1_Detail: %s' % event.data)
         elif event.event_type == 'realtime':
-            self.log.info('策略1分时: %s' % event.data)
+            self.log.info('Strategy1_Realtime: %s' % event.data)
         elif event.event_type == 'kdata':
-            self.log.info('策略1k线图: %s' % event.data)
+            self.log.info('Strategy1_Kdata: %s' % event.data)
         elif event.event_type == 'general':
-            self.log.info('策略1概要: %s' % event.data)
+            self.log.info('Strategy1_General: %s' % event.data)
         #self.log.info('行情数据: 万科价格: %s' % event.data['000002'])
         #self.log.info('检查持仓')
         #self.log.info(self.user.balance)
@@ -83,17 +83,18 @@ class Strategy(StrategyTemplate):
         """
         if event.data.clock_event == 'open':
             # 开市了
-            self.log.info('策略1开市')
+            self.log.info('Strategy1_Open')
         elif event.data.clock_event == 'close':
             # 收市了
-            self.log.info('策略1闭市')
+            self.log.info('Strategy1_Close')
         elif event.data.clock_event == 5:
             # 5 分钟的 clock
-            self.log.info("策略1五分钟")
+            self.log.info("Strategy1_5min")
 
     def log_handler(self):
         """自定义 log 记录方式"""
-        return DefaultLogHandler(self.name, log_type='stdout', filepath='demo1.log')
+        log = self.name + '.log'
+        return DefaultLogHandler(self.name, log_type='stdout', filepath=log)
 
     def shutdown(self):
         """
