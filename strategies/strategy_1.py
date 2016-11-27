@@ -1,7 +1,7 @@
 import time
 import datetime as dt
 from dateutil import tz
-from easyquant import DefaultLogHandler
+#from easyquant import DefaultLogHandler
 from easyquant import StrategyTemplate
 
 
@@ -91,10 +91,10 @@ class Strategy(StrategyTemplate):
             # 5 分钟的 clock
             self.log.info("Strategy1_5min")
 
-    def log_handler(self):
-        """自定义 log 记录方式"""
-        log = self.name + '.log'
-        return DefaultLogHandler(self.name, log_type='stdout', filepath=log)
+#    def log_handler(self):
+#        """自定义 log 记录方式"""
+#        log = self.name + '.log'
+#        return DefaultLogHandler(self.name, log_type='file', filepath=log)
 
     def shutdown(self):
         """

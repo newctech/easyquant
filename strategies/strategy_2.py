@@ -1,4 +1,5 @@
 from easyquant import StrategyTemplate
+#from easyquant import DefaultLogHandler
 
 
 class Strategy(StrategyTemplate):
@@ -12,7 +13,7 @@ class Strategy(StrategyTemplate):
         #self.log.info('\n')
 
 
-    def log_handler(self):
-        """自定义 log 记录方式"""
-        log = self.name + '.log'
-        return DefaultLogHandler(self.name, log_type='stdout', filepath=log)
+#    def log_handler(self):
+#        """自定义 log 记录方式"""
+#        log = self.name + '.log'
+#        return DefaultLogHandler(self.name, log_type='stdout', filepath=log)
