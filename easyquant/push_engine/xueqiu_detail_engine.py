@@ -9,7 +9,7 @@ from easyquant.event_engine import Event
 class XueqiuDetailEngine(BaseEngine):
     """雪球分笔行情推送引擎"""
     EventType = 'detail'
-    PushInterval = 1
+    PushInterval = 0
 
     def init(self):
         self.source = easyquotation.use('xq')
