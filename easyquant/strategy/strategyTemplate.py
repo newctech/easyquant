@@ -37,6 +37,13 @@ class StrategyTemplate:
         self.kdata_file = stockdata_path + '/kdata.hdf5'
         self.general_file = stockdata_path + '/general.hdf5'
 
+        self.__pankou_store = pd.HDFStore(self.pankou_file)
+        self.__detail_store = pd.HDFStore(self.detail_file)
+        self.__realtime_store = pd.HDFStore(self.realtime_file)
+        self.__kdata_store = pd.HDFStore(self.kdata_file)
+        self.__general_store = pd.HDFStore(self.general_file)
+
+
     def strategy(self, event):
         """:param event event.data 为所有股票的信息，结构如下
         {'162411':
@@ -90,47 +97,41 @@ class StrategyTemplate:
                                  columns=['symbol', 'time', 'current', 'buypct', 'sellpct', 'diff', 'ratio', 'bp1',
                                           'bc1', 'bp2', 'bc2', 'bp3', 'bc3', 'bp4', 'bc4', 'bp5', 'bc5', 'sp1', 'sc1',
                                           'sp2', 'sc2', 'sp3', 'sc3', 'sp4', 'sc4', 'sp5', 'sc5'])
-        if os.path.exists(self.pankou_file):
-            with pd.HDFStore(self.pankou_file) as store:
-                store.append(pankou['symbol'], pankou_df, format="table", append=True)
+        key = '/' + pankou['symbol']
+        if key not in self.__pankou_store.keys():
+            self.__pankou_store.put(pankou['symbol'], pankou_df, format="table")
         else:
-            with pd.HDFStore(self.pankou_file) as store:
-                store.put(pankou['symbol'], pankou_df, format="table")
+            self.__pankou_store.append(pankou['symbol'], pankou_df, format="table", append=True)
 
     def pankou_read_hdf5(self, symbol):
-        with pd.HDFStore(self.pankou_file) as store:
-            pankou_df = store.select(symbol)
+        pankou_df = self.__pankou_store.select(symbol)
         return pankou_df
 
     def detail_write_hdf5(self, detail):
         detail_df = pd.DataFrame([detail], index=[str(detail['t'])],
                                  columns=['s', 'ts', 'v', 'type', 'avgPrice', 'c', 'chg', 'pct', 'bp1', 'sp1', 'ttv'])
-        if os.path.exists(self.detail_file):
-            with pd.HDFStore(self.detail_file) as store:
-                store.append(detail['s'], detail_df, format="table", append=True)
+        key  = '/' + detail['s'],
+        if key not in self.__detail_store.keys():
+            self.__detail_store.put(detail['s'], detail_df, format="table")
         else:
-            with pd.HDFStore(self.detail_file) as store:
-                store.put(detail['s'], detail_df, format="table")
+            self.__detail_store.append(detail['s'], detail_df, format="table", append=True)
 
     def detail_read_hdf5(self, symbol):
-        with pd.HDFStore(self.detail_file) as store:
-            detail_df = store.select(symbol)
+        detail_df = self.__detail_store.select(symbol)
         return detail_df
 
     def realtime_write_hdf5(self, realtime, symbol):
         timestamp = str(int(time.mktime(time.strptime(realtime['time'], '%a %b %d %H:%M:%S %z %Y')) * 1000))
         realtime_df = pd.DataFrame([realtime], index=[timestamp],
                                    columns=['time', 'avg_price', 'current', 'volume'])
-        if os.path.exists(self.realtime_file):
-            with pd.HDFStore(self.realtime_file) as store:
-                store.append(symbol, realtime_df, format="table", append=True)
+        key = '/' + symbol
+        if key not in self.__realtime_store.keys():
+            self.__realtime_store.put(symbol, realtime_df, format="table")
         else:
-            with pd.HDFStore(self.realtime_file) as store:
-                store.put(symbol, realtime_df, format="table")
+            self.__realtime_store.append(symbol, realtime_df, format="table", append=True)
 
     def realtime_read_hdf5(self, symbol):
-        with pd.HDFStore(self.realtime_file) as store:
-            realtime_df = store.select(symbol)
+        realtime_df = self.__realtime_store.select(symbol)
         return realtime_df
 
     def kdata_write_hdf5(self, kdata, symbol):
@@ -138,16 +139,14 @@ class StrategyTemplate:
         kdata_df = pd.DataFrame([kdata], index=[timestamp],
                                 columns=['time', 'open', 'close', 'high', 'low', 'chg', 'percent', 'volume', 'turnrate',
                                          'ma5', 'ma10', 'ma20', 'ma30', 'macd', 'dif', 'dea'])
-        if os.path.exists(self.kdata_file):
-            with pd.HDFStore(self.kdata_file) as store:
-                store.append(symbol, kdata_df, format="table", append=True)
+        key = '/' + symbol
+        if key not in self.__kdata_store.keys():
+            self.__kdata_store.put(symbol, kdata_df, format="table")
         else:
-            with pd.HDFStore(self.kdata_file) as store:
-                store.put(symbol, kdata_df, format="table")
+            self.__kdata_store.append(symbol, kdata_df, format="table", append=True)
 
-    def kldata_read_hdf5(self, symbol):
-        with pd.HDFStore(self.kdata_file) as store:
-            kdata_df = store.select(symbol)
+    def kdata_read_hdf5(self, symbol):
+        kdata_df = self.__kdata_store.select(symbol)
         return kdata_df
 
     def general_write_hdf5(self, general):
@@ -163,16 +162,14 @@ class StrategyTemplate:
                                            'change', 'eps', 'type', 'issue_type', 'redeem_type', 'par_value',
                                            'updateAt',
                                            'volumeAverage'])
-        if os.path.exists(self.general_file):
-            with pd.HDFStore(self.general_file) as store:
-                store.append(general['symbol'], general_df, format="table", append=True)
+        key  = '/' + general['symbol']
+        if key not in self.__general_store.keys():
+            self.__general_store.put(general['symbol'], general_df, format="table")
         else:
-            with pd.HDFStore(self.general_file) as store:
-                store.put(general['symbol'], general_df, format="table")
+            self.__general_store.append(general['symbol'], general_df, format="table", append=True)
 
     def general_read_hdf5(self, symbol):
-        with pd.HDFStore(self.general_file) as store:
-            general_df = store.select(symbol)
+        general_df = self.__general_store.select(symbol)
         return general_df
 
     def log_handler(self):
@@ -187,4 +184,13 @@ class StrategyTemplate:
         关闭进程前调用该函数
         :return:
         """
+        self.__pankou_store.close()
+        self.__detail_store.close()
+        self.__realtime_store.close()
+        self.__kdata_store.close()
+        self.__general_store.close()
+
+        self.shutdown_strategy()
+
+    def shutdown_strategy(self):
         pass

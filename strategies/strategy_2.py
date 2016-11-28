@@ -17,3 +17,10 @@ class Strategy(StrategyTemplate):
 #        """自定义 log 记录方式"""
 #        log = self.name + '.log'
 #        return DefaultLogHandler(self.name, log_type='stdout', filepath=log)
+
+    def shutdown_strategy(self):
+        """
+        关闭进程前的调用
+        :return:
+        """
+        self.log.info("假装在关闭前保存了策略数据")

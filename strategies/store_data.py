@@ -122,7 +122,7 @@ class Strategy(StrategyTemplate):
 #        log = self.name + '.log'
 #        return DefaultLogHandler(self.name, log_type='file', filepath=log)
 
-    def shutdown(self):
+    def shutdown_strategy(self):
         """
         关闭进程前的调用
         :return:
