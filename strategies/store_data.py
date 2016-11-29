@@ -105,8 +105,9 @@ class Strategy(StrategyTemplate):
         elif event.data.clock_event == 'closed':
             # 收市更新数据
             self.log.info('StoreData_Closed')
-            key = '/' + self.symbol
-            if key not in self.__kdata_store.keys():
+            try:
+                self.kdata_read_hdf5(self.symbol)
+            except:
                 kall_lists = self.source.get_kall_data(self.symbol)
                 for kall in kall_lists:
                     self.kdata_write_hdf5(kall, self.symbol)
