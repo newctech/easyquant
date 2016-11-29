@@ -110,7 +110,7 @@ class StrategyTemplate:
     def detail_write_hdf5(self, detail):
         detail_df = pd.DataFrame([detail], index=[str(detail['t'])],
                                  columns=['s', 'ts', 'v', 'type', 'avgPrice', 'c', 'chg', 'pct', 'bp1', 'sp1', 'ttv'])
-        key  = '/' + detail['s'],
+        key  = '/' + detail['s']
         if key not in self.__detail_store.keys():
             self.__detail_store.put(detail['s'], detail_df, format="table")
         else:

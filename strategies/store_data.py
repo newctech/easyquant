@@ -105,14 +105,16 @@ class Strategy(StrategyTemplate):
         elif event.data.clock_event == 'closed':
             # 收市更新数据
             self.log.info('StoreData_Closed')
-            if os.path.exists(self.kdata_file):
-                k_list = self.source.get_k_data(self.stocks)
-                for k in k_list:
-                    self.kdata_write_hdf5(k, self.symbol)
-            else:
-                kall_lists = self.source.get_kall_data(self.stocks)
+            key = '/' + self.symbol
+            if key not in self.__kdata_store.keys():
+                kall_lists = self.source.get_kall_data(self.symbol)
                 for kall in kall_lists:
                     self.kdata_write_hdf5(kall, self.symbol)
+            else:
+                k_list = self.source.get_k_data(self.symbol)
+                for k in k_list:
+                    self.kdata_write_hdf5(k, self.symbol)
+
         elif event.data.clock_event == 5:
             # 5 分钟的 clock
             self.log.info("StoreData_5min")
