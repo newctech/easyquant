@@ -4,6 +4,7 @@ import os
 import time
 import traceback
 import pandas as pd
+import threading
 
 
 class StrategyTemplate:
@@ -38,10 +39,19 @@ class StrategyTemplate:
         self.general_file = stockdata_path + '/general.hdf5'
 
         self.__pankou_store = pd.HDFStore(self.pankou_file)
+        self.__pankou_lock = threading.Lock()
+
         self.__detail_store = pd.HDFStore(self.detail_file)
+        self.__detail_lock = threading.Lock()
+
         self.__realtime_store = pd.HDFStore(self.realtime_file)
+        self.__realtime_lock = threading.Lock()
+
         self.__kdata_store = pd.HDFStore(self.kdata_file)
+        self.__kdata_lock = threading.Lock()
+
         self.__general_store = pd.HDFStore(self.general_file)
+        self.__general_lock = threading.Lock()
 
 
     def strategy(self, event):
@@ -98,26 +108,34 @@ class StrategyTemplate:
                                           'bc1', 'bp2', 'bc2', 'bp3', 'bc3', 'bp4', 'bc4', 'bp5', 'bc5', 'sp1', 'sc1',
                                           'sp2', 'sc2', 'sp3', 'sc3', 'sp4', 'sc4', 'sp5', 'sc5'])
         key = '/' + pankou['symbol']
+        self.__pankou_lock.acquire()
         if key not in self.__pankou_store.keys():
             self.__pankou_store.put(pankou['symbol'], pankou_df, format="table")
         else:
             self.__pankou_store.append(pankou['symbol'], pankou_df, format="table", append=True)
+        self.__pankou_lock.release()
 
     def pankou_read_hdf5(self, symbol):
+        self.__pankou_lock.acquire()
         pankou_df = self.__pankou_store.select(symbol)
+        self.__pankou_lock.release()
         return pankou_df
 
     def detail_write_hdf5(self, detail):
         detail_df = pd.DataFrame([detail], index=[str(detail['t'])],
                                  columns=['s', 'ts', 'v', 'type', 'avgPrice', 'c', 'chg', 'pct', 'bp1', 'sp1', 'ttv'])
         key  = '/' + detail['s']
+        self.__detail_lock.acquire()
         if key not in self.__detail_store.keys():
             self.__detail_store.put(detail['s'], detail_df, format="table")
         else:
             self.__detail_store.append(detail['s'], detail_df, format="table", append=True)
+        self.__detail_lock.release()
 
     def detail_read_hdf5(self, symbol):
+        self.__detail_lock.acquire()
         detail_df = self.__detail_store.select(symbol)
+        self.__detail_lock.release()
         return detail_df
 
     def realtime_write_hdf5(self, realtime, symbol):
@@ -125,13 +143,17 @@ class StrategyTemplate:
         realtime_df = pd.DataFrame([realtime], index=[timestamp],
                                    columns=['time', 'avg_price', 'current', 'volume'])
         key = '/' + symbol
+        self.__realtime_lock.acquire()
         if key not in self.__realtime_store.keys():
             self.__realtime_store.put(symbol, realtime_df, format="table")
         else:
             self.__realtime_store.append(symbol, realtime_df, format="table", append=True)
+        self.__realtime_lock.release()
 
     def realtime_read_hdf5(self, symbol):
+        self.__realtime_lock.acquire()
         realtime_df = self.__realtime_store.select(symbol)
+        self.__realtime_lock.release()
         return realtime_df
 
     def kdata_write_hdf5(self, kdata, symbol):
@@ -140,13 +162,17 @@ class StrategyTemplate:
                                 columns=['time', 'open', 'close', 'high', 'low', 'chg', 'percent', 'volume', 'turnrate',
                                          'ma5', 'ma10', 'ma20', 'ma30', 'macd', 'dif', 'dea'])
         key = '/' + symbol
+        self.__kdata_lock.acquire()
         if key not in self.__kdata_store.keys():
             self.__kdata_store.put(symbol, kdata_df, format="table")
         else:
             self.__kdata_store.append(symbol, kdata_df, format="table", append=True)
+        self.__kdata_lock.release()
 
     def kdata_read_hdf5(self, symbol):
+        self.__kdata_lock.acquire()
         kdata_df = self.__kdata_store.select(symbol)
+        self.__kdata_lock.release()
         return kdata_df
 
     def general_write_hdf5(self, general):
@@ -162,14 +188,18 @@ class StrategyTemplate:
                                            'change', 'eps', 'type', 'issue_type', 'redeem_type', 'par_value',
                                            'updateAt',
                                            'volumeAverage'])
-        key  = '/' + general['symbol']
+        key = '/' + general['symbol']
+        self.__general_lock.acquire()
         if key not in self.__general_store.keys():
             self.__general_store.put(general['symbol'], general_df, format="table")
         else:
             self.__general_store.append(general['symbol'], general_df, format="table", append=True)
+        self.__general_lock.release()
 
     def general_read_hdf5(self, symbol):
+        self.__general_lock.acquire()
         general_df = self.__general_store.select(symbol)
+        self.__general_lock.release()
         return general_df
 
     def log_handler(self):
