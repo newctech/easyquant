@@ -16,13 +16,11 @@ class StrategyTemplate:
         self.clock_engine = main_engine.clock_engine
         # 优先使用自定义 log 句柄, 否则使用主引擎日志句柄
         self.log = self.log_handler() or log_handler
-        self.pankou_file = None
-        self.detail_file = None
-        self.realtime_file = None
-        self.kdata_file = None
-        self.general_file = None
         self.path_init()
+        self.quota_init()
         self.init()
+
+
 
     def init(self):
         # 进行相关的初始化操作
@@ -52,6 +50,24 @@ class StrategyTemplate:
 
         self.__general_store = pd.HDFStore(self.general_file)
         self.__general_lock = threading.Lock()
+
+    def quota_init(self):
+        #特大订单,100万元以上
+        self.__Extralarge_detail = 0
+        self.__Extralarge_detail_lock = threading.Lock()
+
+        #大单,50-100万元
+        self.__Big_detail = 0
+        self.__Big_detail_lock = threading.Lock()
+
+        #中单,4万元-50万元
+        self.__Medium_detail = 0
+        self.__Medium_detail_lock = threading.Lock()
+
+        #小单,4万元以下
+        self.__Small_detail = 0
+        self.__Small_detail_lock = threading.Lock()
+
 
 
     def strategy(self, event):
@@ -201,6 +217,52 @@ class StrategyTemplate:
         general_df = self.__general_store.select(symbol)
         self.__general_lock.release()
         return general_df
+
+
+    def set_Extralarge_detail(self, value):
+        self.__Extralarge_detail_lock.acquire()
+        self.__Extralarge_detail = value
+        self.__Extralarge_detail_lock.release()
+
+    def get_Extralarge_detail(self):
+        self.__Extralarge_detail_lock.acquire()
+        value = self.__Extralarge_detail
+        self.__Extralarge_detail_lock.release()
+        return value
+
+    def set_Big_detail(self, value):
+        self.__Big_detail_lock.acquire()
+        self.__Big_detail = value
+        self.__Big_detail_lock.release()
+
+    def get_Big_detail(self):
+        self.__Big_detail_lock.acquire()
+        value = self.__Big_detail
+        self.__Big_detail_lock.release()
+        return value
+
+    def set_Medium_detail(self, value):
+        self.__Medium_detail_lock.acquire()
+        self.__Medium_detail = value
+        self.__Medium_detail_lock.release()
+
+    def get_Medium_detail(self):
+        self.__Medium_detail_lock.acquire()
+        value = self.__Medium_detail
+        self.__Medium_detail_lock.release()
+        return value
+
+    def set_Small_detail(self, value):
+        self.__Small_detail_lock.acquire()
+        self.__Small_detail = value
+        self.__Small_detail_lock.release()
+
+    def get_Small_detail(self):
+        self.__Small_detail_lock.acquire()
+        value = self.__Small_detail
+        self.__Small_detail_lock.release()
+        return value
+
 
     def log_handler(self):
         """
