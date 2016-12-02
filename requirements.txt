@@ -12,3 +12,4 @@ arrow
 tushare
 xlrd
 tables
+json

@@ -1,6 +1,7 @@
 # coding:utf-8
 import sys
 import os
+import json
 import time
 import datetime
 import traceback
@@ -30,9 +31,9 @@ class StrategyTemplate:
 
     def path_init(self):
         self.__init_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..")) + '/config/init.json'
-        self.__init_config = self.__file2dict(self.__init_path)
+        self.__init_config = self.file2dict(self.__init_path)
         self.__backups_path = os.path.abspath(os.path.join(os.path.dirname(__file__),"..")) + '/config/backups.json'
-        self.__backups_config = self.__file2dict(self.__backups_path)
+        self.__backups_config = self.file2dict(self.__backups_path)
 
         stockdata_path = os.path.abspath(os.path.join(os.path.dirname(__file__),"..")) + '/stockdata'
         if not os.path.exists(stockdata_path):
@@ -92,10 +93,10 @@ class StrategyTemplate:
         self.__Small_detail_lock = threading.Lock()
 
 
-    def __file2dict(self, path):
+    def file2dict(self, path):
         with open(path, 'r', encoding='utf-8') as f:
             return json.load(f)
-    def __dict2file(self, data, path):
+    def dict2file(self, data, path):
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(data, f)
 
@@ -305,12 +306,6 @@ class StrategyTemplate:
         关闭进程前调用该函数
         :return:
         """
-        __bakeups = {'detail': {}}
-        __bakeups['detail']['Extralarge_detail'] = self.__Extralarge_detail
-        __bakeups['detail']['Big_detail'] = self.__Big_detail
-        __bakeups['detail']['Medium_detail'] = self.__Medium_detail
-        __bakeups['detail']['Small_detail'] = self.__Small_detail
-        self.__dict2file(__bakeups, self.__backups_path)
 
         self.__pankou_store.close()
         self.__detail_store.close()

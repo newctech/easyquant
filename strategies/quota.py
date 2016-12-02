@@ -33,6 +33,8 @@ class Strategy(StrategyTemplate):
         self.source = easyquotation.use('xq')
         self.symbol = 'SH601211'
 
+        self.__backups_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..")) + '/easyquant/config/backups.json'
+
     def strategy(self, event):
         """:param event event.data 为所有股票的信息，结构如下
         {'162411':
@@ -138,4 +140,11 @@ class Strategy(StrategyTemplate):
         关闭进程前的调用
         :return:
         """
-        self.log.info("假装在关闭前保存了策略数据")
+        __bakeups = {'detail': {}}
+        __bakeups['detail']['Extralarge_detail'] = self.get_Extralarge_detail()
+        __bakeups['detail']['Big_detail'] = self.get_Big_detail()
+        __bakeups['detail']['Medium_detail'] = self.get_Medium_detail()
+        __bakeups['detail']['Small_detail'] = self.get_Small_detail()
+        self.dict2file(__bakeups, self.__backups_path)
+
+        self.log.info("%s 在关闭前保存了策略数据" % self.name)

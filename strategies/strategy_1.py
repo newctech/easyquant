@@ -101,4 +101,4 @@ class Strategy(StrategyTemplate):
         关闭进程前的调用
         :return:
         """
-        self.log.info("假装在关闭前保存了策略数据")
+        self.log.info("%s 在关闭前保存了策略数据" % self.name)
