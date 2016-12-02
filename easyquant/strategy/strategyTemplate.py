@@ -2,6 +2,7 @@
 import sys
 import os
 import time
+import datetime
 import traceback
 import pandas as pd
 import threading
@@ -16,6 +17,7 @@ class StrategyTemplate:
         self.clock_engine = main_engine.clock_engine
         # 优先使用自定义 log 句柄, 否则使用主引擎日志句柄
         self.log = self.log_handler() or log_handler
+
         self.path_init()
         self.quota_init()
         self.init()
@@ -27,6 +29,11 @@ class StrategyTemplate:
         pass
 
     def path_init(self):
+        self.__init_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..")) + '/config/init.json'
+        self.__init_config = self.__file2dict(self.__init_path)
+        self.__backups_path = os.path.abspath(os.path.join(os.path.dirname(__file__),"..")) + '/config/backups.json'
+        self.__backups_config = self.__file2dict(self.__backups_path)
+
         stockdata_path = os.path.abspath(os.path.join(os.path.dirname(__file__),"..")) + '/stockdata'
         if not os.path.exists(stockdata_path):
             os.makedirs(stockdata_path)
@@ -52,23 +59,45 @@ class StrategyTemplate:
         self.__general_lock = threading.Lock()
 
     def quota_init(self):
+        self.__opentime = datetime.time(9,0,0)
+        self.__closetime = datetime.time(15, 0, 0)
+        self.__now = datetime.datetime.now().time()
+
         #特大订单,100万元以上
-        self.__Extralarge_detail = 0
+        if self.__opentime < self.__now < self.__closetime:
+            self.__Extralarge_detail = self.__backups_config['detail']['Extralarge_detail']
+        else:
+            self.__Extralarge_detail = self.__init_config['detail']['Extralarge_detail']
         self.__Extralarge_detail_lock = threading.Lock()
 
         #大单,50-100万元
-        self.__Big_detail = 0
+        if self.__opentime < self.__now < self.__closetime:
+            self.__Big_detail = self.__backups_config['detail']['Big_detail']
+        else:
+            self.__Big_detail = self.__init_config['detail']['Big_detail']
         self.__Big_detail_lock = threading.Lock()
 
         #中单,4万元-50万元
-        self.__Medium_detail = 0
+        if self.__opentime < self.__now < self.__closetime:
+            self.__Medium_detail = self.__backups_config['detail']['Medium_detail']
+        else:
+            self.__Medium_detail = self.__init_config['detail']['Medium_detail']
         self.__Medium_detail_lock = threading.Lock()
 
         #小单,4万元以下
-        self.__Small_detail = 0
+        if self.__opentime < self.__now < self.__closetime:
+            self.__Small_detail = self.__backups_config['detail']['Small_detail']
+        else:
+            self.__Small_detail = self.__init_config['detail']['Small_detail']
         self.__Small_detail_lock = threading.Lock()
 
 
+    def __file2dict(self, path):
+        with open(path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    def __dict2file(self, data, path):
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(data, f)
 
     def strategy(self, event):
         """:param event event.data 为所有股票的信息，结构如下
@@ -276,6 +305,13 @@ class StrategyTemplate:
         关闭进程前调用该函数
         :return:
         """
+        __bakeups = {'detail': {}}
+        __bakeups['detail']['Extralarge_detail'] = self.__Extralarge_detail
+        __bakeups['detail']['Big_detail'] = self.__Big_detail
+        __bakeups['detail']['Medium_detail'] = self.__Medium_detail
+        __bakeups['detail']['Small_detail'] = self.__Small_detail
+        self.__dict2file(__bakeups, self.__backups_path)
+
         self.__pankou_store.close()
         self.__detail_store.close()
         self.__realtime_store.close()
