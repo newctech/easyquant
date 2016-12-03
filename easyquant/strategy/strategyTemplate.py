@@ -148,9 +148,9 @@ class StrategyTemplate:
         pass
 
     def pankou_write_hdf5(self, pankou):
-        timestamp = str(int(time.mktime(time.strptime(pankou['time'], '%b %d, %Y %H:%M:%S %p')) * 1000))
+        timestamp = pd.Timestamp(pankou['time'])
         pankou_df = pd.DataFrame([pankou], index=[timestamp],
-                                 columns=['symbol', 'time', 'current', 'buypct', 'sellpct', 'diff', 'ratio', 'bp1',
+                                 columns=['symbol', 'current', 'buypct', 'sellpct', 'diff', 'ratio', 'bp1',
                                           'bc1', 'bp2', 'bc2', 'bp3', 'bc3', 'bp4', 'bc4', 'bp5', 'bc5', 'sp1', 'sc1',
                                           'sp2', 'sc2', 'sp3', 'sc3', 'sp4', 'sc4', 'sp5', 'sc5'])
         key = '/' + pankou['symbol']
@@ -168,8 +168,10 @@ class StrategyTemplate:
         return pankou_df
 
     def detail_write_hdf5(self, detail):
-        detail_df = pd.DataFrame([detail], index=[str(detail['t'])],
-                                 columns=['s', 'ts', 'v', 'type', 'avgPrice', 'c', 'chg', 'pct', 'bp1', 'sp1', 'ttv'])
+        timeArray = time.localtime(detail['t'] / 1000)
+        timestamp = pd.Timestamp(time.strftime("%Y-%m-%d %H:%M:%S", timeArray))
+        detail_df = pd.DataFrame([detail], index=[timestamp],
+                                 columns=['s', 'v', 'type', 'avgPrice', 'c', 'chg', 'pct', 'bp1', 'sp1', 'ttv'])
         key  = '/' + detail['s']
         self.__detail_lock.acquire()
         if key not in self.__detail_store.keys():
@@ -185,9 +187,10 @@ class StrategyTemplate:
         return detail_df
 
     def realtime_write_hdf5(self, realtime, symbol):
-        timestamp = str(int(time.mktime(time.strptime(realtime['time'], '%a %b %d %H:%M:%S %z %Y')) * 1000))
+        timeArray = time.strptime(realtime['time'], "%a %b %d %H:%M:%S %z %Y")
+        timestamp = pd.Timestamp(time.strftime("%Y-%m-%d %H:%M:%S", timeArray))
         realtime_df = pd.DataFrame([realtime], index=[timestamp],
-                                   columns=['time', 'avg_price', 'current', 'volume'])
+                                   columns=['avg_price', 'current', 'volume'])
         key = '/' + symbol
         self.__realtime_lock.acquire()
         if key not in self.__realtime_store.keys():
@@ -203,9 +206,10 @@ class StrategyTemplate:
         return realtime_df
 
     def kdata_write_hdf5(self, kdata, symbol):
-        timestamp = str(int(time.mktime(time.strptime(kdata['time'], '%a %b %d %H:%M:%S %z %Y')) * 1000))
+        timeArray = time.strptime(kdata['time'], "%a %b %d %H:%M:%S %z %Y")
+        timestamp = pd.Timestamp(time.strftime("%Y-%m-%d %H:%M:%S", timeArray))
         kdata_df = pd.DataFrame([kdata], index=[timestamp],
-                                columns=['time', 'open', 'close', 'high', 'low', 'chg', 'percent', 'volume', 'turnrate',
+                                columns=['open', 'close', 'high', 'low', 'chg', 'percent', 'volume', 'turnrate',
                                          'ma5', 'ma10', 'ma20', 'ma30', 'macd', 'dif', 'dea'])
         key = '/' + symbol
         self.__kdata_lock.acquire()
@@ -222,9 +226,10 @@ class StrategyTemplate:
         return kdata_df
 
     def general_write_hdf5(self, general):
-        timestamp = str(int(time.mktime(time.strptime(general['time'], '%a %b %d %H:%M:%S %z %Y')) * 1000))
+        timeArray = time.strptime(detail[0]['time'], "%a %b %d %H:%M:%S %z %Y")
+        timestamp = pd.Timestamp(time.strftime("%Y-%m-%d %H:%M:%S", timeArray))
         general_df = pd.DataFrame([general], index=[timestamp],
-                                  columns=['symbol', 'time', 'open', 'current', 'percentage', 'high', 'low',
+                                  columns=['symbol', 'open', 'current', 'percentage', 'high', 'low',
                                            'turnover_rate',
                                            'volume', 'amount', 'marketCapital', 'totalShares', 'float_market_capital',
                                            'float_shares', 'last_close', 'amplitude', 'rise_stop', 'fall_stop',

@@ -27,7 +27,7 @@ class Strategy(StrategyTemplate):
         self.clock_engine.register_moment(clock_type, moment)
 
         # 注册时钟间隔事件, 不在交易阶段也会触发, clock_type == minute_interval
-        minute_interval = 1.5
+        minute_interval = 0.5
         self.clock_engine.register_interval(minute_interval, trading=False)
 
         self.source = easyquotation.use('xq')
@@ -119,8 +119,11 @@ class Strategy(StrategyTemplate):
         """
         if event.data.clock_event == 'open':
             # 开市了
-            #self.log.info('StoreData_Open')
-            pass
+            self.set_Extralarge_detail(0)
+            self.set_Big_detail(0)
+            self.set_Medium_detail(0)
+            self.set_Small_detail(0)
+            self.log.info('Detail_Orders_Statistics init')
         elif event.data.clock_event == 'close':
             # 收市了
             #self.log.info('StoreData_Close')
