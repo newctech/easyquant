@@ -226,7 +226,7 @@ class StrategyTemplate:
         return kdata_df
 
     def general_write_hdf5(self, general):
-        timeArray = time.strptime(detail[0]['time'], "%a %b %d %H:%M:%S %z %Y")
+        timeArray = time.strptime(general['time'], "%a %b %d %H:%M:%S %z %Y")
         timestamp = pd.Timestamp(time.strftime("%Y-%m-%d %H:%M:%S", timeArray))
         general_df = pd.DataFrame([general], index=[timestamp],
                                   columns=['symbol', 'open', 'current', 'percentage', 'high', 'low',
