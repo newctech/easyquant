@@ -1,18 +1,12 @@
-import easyquotation
-
 import easyquant
-from easyquant import DefaultQuotationEngine, DefaultLogHandler, PushBaseEngine, XueqiuPankouEngine, XueqiuDetailEngine, XueqiuRealtimeEngine, XueqiuKdataEngine, XueqiuGeneralEngine
+from easyquant import DefaultQuotationEngine, DefaultLogHandler, PushBaseEngine, XueqiuAllEngine, XueqiuPankouEngine, XueqiuDetailEngine, XueqiuRealtimeEngine, XueqiuKdataEngine, XueqiuGeneralEngine
 
 print('开始启动......')
 broker = 'xq'
-def get_broker_need_data(broker):
-    need_data = input('请输入你的帐号配置文件路径(直接回车使用 %s.json)\n:' % broker)
-    if need_data == '':
-        return '%s.json' % broker
-    return need_data
-need_data = get_broker_need_data(broker)
+need_data = 'xq.json'
 
-quotation_engine = [XueqiuPankouEngine, XueqiuDetailEngine, XueqiuRealtimeEngine, XueqiuKdataEngine, XueqiuGeneralEngine]
+#quotation_engine = [XueqiuPankouEngine, XueqiuDetailEngine, XueqiuRealtimeEngine, XueqiuKdataEngine, XueqiuGeneralEngi]
+quotation_engine = [XueqiuAllEngine]
 
 log_type_choose = input('请输入 log 记录方式: 1: 显示在屏幕 2: 记录到指定文件\n: ')
 log_type = 'stdout' if log_type_choose == '1' else 'file'
