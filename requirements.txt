@@ -13,6 +13,5 @@ tushare
 xlrd
 tables
 json
-socket
 select
 queue
