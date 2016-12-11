@@ -15,3 +15,6 @@ tables
 json
 select
 queue
+demjson
+logbook
+arrow

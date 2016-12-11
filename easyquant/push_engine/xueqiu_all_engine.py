@@ -27,33 +27,42 @@ class XueqiuAllEngine(BaseEngine):
 
 
     def push_quotation(self):
-        while self.is_active:
-            events = self.epoll.poll(self.timeout)
-            if not events:
-                continue
-            for fd, event in events:
-                socket = self.fd_to_socket[fd]
-                if socket == self.serversocket:
-                    connection, address = self.serversocket.accept()
-                    connection.setblocking(False)
-                    self.epoll.register(connection.fileno(), select.EPOLLIN)
-                    self.fd_to_socket[connection.fileno()] = connection
-                    self.message_queues[connection] = queue.Queue()
-                elif event & select.EPOLLHUP:
-                    self.epoll.unregister(fd)
-                    self.fd_to_socket[fd].close()
-                    del self.fd_to_socket[fd]
-                elif event & select.EPOLLIN:
-                    self.buf += socket.recv(8192)
-                    if self.buf.endswith(b'EOF'):
-                        self.message_queues[socket].put(self.buf.decode('utf-8')[:-3])
-                        self.buf = b''
-                        self.epoll.modify(fd, select.EPOLLOUT)
-                elif event & select.EPOLLOUT:
-                    try:
-                        response_lists = self.message_queues[socket].get_nowait()
-                    except queue.Empty:
-                        self.epoll.modify(fd, select.EPOLLIN)
-                    else:
-                        event_req = Event(event_type=self.EventType, data=response_lists)
-                        self.event_engine.put(event_req)
+        try:
+            while self.is_active:
+                events = self.epoll.poll(self.timeout)
+                if not events:
+                    continue
+                for fd, event in events:
+                    socket = self.fd_to_socket[fd]
+                    if socket == self.serversocket:
+                        connection, address = self.serversocket.accept()
+                        connection.setblocking(False)
+                        self.epoll.register(connection.fileno(), select.EPOLLIN)
+                        self.fd_to_socket[connection.fileno()] = connection
+                        self.message_queues[connection] = queue.Queue()
+                    elif event & select.EPOLLHUP:
+                        self.epoll.unregister(fd)
+                        self.fd_to_socket[fd].close()
+                        del self.fd_to_socket[fd]
+                    elif event & select.EPOLLIN:
+                        tmpbuf = socket.recv(10240)
+                        if not len(tmpbuf):
+                            self.epoll.modify(fd, select.EPOLLHUP)
+                        if self.buf.endswith(b'EOF'):
+                            self.buf += tmpbuf
+                            self.message_queues[socket].put(self.buf.decode('utf-8')[:-3])
+                            self.buf = b''
+                            self.epoll.modify(fd, select.EPOLLOUT)
+                        self.buf += tmpbuf
+                    elif event & select.EPOLLOUT:
+                        try:
+                            response_lists = self.message_queues[socket].get_nowait()
+                        except queue.Empty:
+                            self.epoll.modify(fd, select.EPOLLIN)
+                        else:
+                            event_req = Event(event_type=self.EventType, data=response_lists)
+                            self.event_engine.put(event_req)
+        finally:
+            self.epoll.unregister(self.serversocket.fileno())
+            self.epoll.close()
+            self.serversocket.close()
