@@ -2,6 +2,7 @@
 import socket
 import select
 import queue
+import json
 
 from .base_engine import BaseEngine
 from easyquant.event_engine import Event

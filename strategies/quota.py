@@ -107,10 +107,6 @@ class Strategy(StrategyTemplate):
             #self.log.info('StoreData_General: %s' % event.data)
             #self.general_write_hdf5(event.data)
             pass
-        #self.log.info('行情数据: 万科价格: %s' % event.data['000002'])
-        #self.log.info('检查持仓')
-        #self.log.info(self.user.balance)
-        #self.log.info('\n')
 
     def clock(self, event):
         """在交易时间会定时推送 clock 事件

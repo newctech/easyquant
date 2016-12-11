@@ -80,16 +80,17 @@ class Strategy(StrategyTemplate):
         elif event.event_type == 'realtime':
             self.log.info('StoreData_Realtime: %s' % event.data)
             self.realtime_write_hdf5(event.data, self.symbol)
-        #elif event.event_type == 'kdata':
-        #    self.log.info('xueqiu_kdata: %s' % event.data)
-        #    self.kdata_write_hdf5(event.data, self.symbol)
         elif event.event_type == 'general':
             self.log.info('StoreData_General: %s' % event.data)
             self.general_write_hdf5(event.data)
-        #self.log.info('行情数据: 万科价格: %s' % event.data['000002'])
-        #self.log.info('检查持仓')
-        #self.log.info(self.user.balance)
-        #self.log.info('\n')
+
+        elif event.event_type == 'all':
+        #初始化,可通过引擎客户端,存储行情
+        #   for stock in event.data:
+        #        symbol_key = stock['stock']['symbol']
+        #        for data in stock['chartlist']:
+        #            self.kdata_write_hdf5(data, symbol_key)
+            self.log.info('StoreData_all: %d' % len(event.data))
 
     def clock(self, event):
         """在交易时间会定时推送 clock 事件
@@ -102,19 +103,6 @@ class Strategy(StrategyTemplate):
         elif event.data.clock_event == 'close':
             # 收市了
             self.log.info('StoreData_Close')
-        elif event.data.clock_event == 'closed':
-            # 收市更新数据
-            self.log.info('StoreData_Closed')
-            try:
-                self.kdata_read_hdf5(self.symbol)
-            except:
-                kall_lists = self.source.get_kall_data(self.symbol)
-                for kall in kall_lists:
-                    self.kdata_write_hdf5(kall, self.symbol)
-            else:
-                k_list = self.source.get_k_data(self.symbol)
-                for k in k_list:
-                    self.kdata_write_hdf5(k, self.symbol)
 
         elif event.data.clock_event == 5:
             # 5 分钟的 clock
