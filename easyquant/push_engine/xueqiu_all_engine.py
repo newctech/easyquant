@@ -48,12 +48,14 @@ class XueqiuAllEngine(BaseEngine):
                         tmpbuf = socket.recv(10240)
                         if not len(tmpbuf):
                             self.epoll.modify(fd, select.EPOLLHUP)
-                        if self.buf.endswith(b'EOF'):
+                        if tmpbuf.endswith(b'EOF'):
                             self.buf += tmpbuf
                             self.message_queues[socket].put(self.buf.decode('utf-8')[:-3])
                             self.buf = b''
+                            tmpbuf = b''
                             self.epoll.modify(fd, select.EPOLLOUT)
-                        self.buf += tmpbuf
+                        else:
+                            self.buf += tmpbuf
                     elif event & select.EPOLLOUT:
                         try:
                             response_lists = self.message_queues[socket].get_nowait()
