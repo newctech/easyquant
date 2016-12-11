@@ -58,11 +58,12 @@ class XueqiuAllEngine(BaseEngine):
                             self.buf += tmpbuf
                     elif event & select.EPOLLOUT:
                         try:
-                            response_lists = self.message_queues[socket].get_nowait()
+                            response_str = self.message_queues[socket].get_nowait()
                         except queue.Empty:
                             self.epoll.modify(fd, select.EPOLLIN)
                         else:
-                            event_req = Event(event_type=self.EventType, data=response_lists)
+                            response_dict = json.loads(response_str)
+                            event_req = Event(event_type=self.EventType, data=response_dict)
                             self.event_engine.put(event_req)
         finally:
             self.epoll.unregister(self.serversocket.fileno())
