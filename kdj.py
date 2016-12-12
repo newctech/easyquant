@@ -1,3 +1,4 @@
+# coding:utf-8
 import easyquant
 from easyquant import DefaultQuotationEngine, DefaultLogHandler, PushBaseEngine, XueqiuAllEngine, XueqiuPankouEngine, XueqiuDetailEngine, XueqiuRealtimeEngine, XueqiuKdataEngine, XueqiuGeneralEngine
 

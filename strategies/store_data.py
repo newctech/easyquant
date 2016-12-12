@@ -1,3 +1,4 @@
+# coding:utf-8
 import os
 import time
 import datetime as dt
@@ -19,11 +20,6 @@ class Strategy(StrategyTemplate):
         # 注册时钟事件
         clock_type = "closing" #尾盘
         moment = dt.time(14, 56, 30, tzinfo=tz.tzlocal())
-        self.clock_engine.register_moment(clock_type, moment)
-
-        # 注册时钟事件
-        clock_type = "closed" #存储K线数据
-        moment = dt.time(15, 10, 0, tzinfo=tz.tzlocal())
         self.clock_engine.register_moment(clock_type, moment)
 
         # 注册时钟间隔事件, 不在交易阶段也会触发, clock_type == minute_interval
@@ -86,7 +82,7 @@ class Strategy(StrategyTemplate):
 
         elif event.event_type == 'all':
         #初始化,可通过引擎客户端,存储行情
-        #   for stock in event.data:
+        #    for stock in event.data:
         #        symbol_key = stock['stock']['symbol']
         #        for data in stock['chartlist']:
         #            self.kdata_write_hdf5(data, symbol_key)

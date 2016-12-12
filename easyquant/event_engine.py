@@ -1,3 +1,4 @@
+# coding:utf-8
 from collections import defaultdict
 from queue import Queue, Empty
 from threading import Thread
