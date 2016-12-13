@@ -278,6 +278,18 @@ class StrategyTemplate:
         self.__Small_detail_lock.release()
         return value
 
+    #获取RSI指标
+    def Get_RSI(df, n):
+        close = np.array(df['close'])
+        rsi = pd.Series(talib.RSI(close, n), index=kdf.index, name='RSI%d' % n)
+        dfrsi = df.join(rsi)
+        return dfrsi
+
+    #获取成交量移动平均值
+    def Get_Volume_MA(df, n):
+        volume = pd.Series(pd.rolling_mean(df['volume'], n), name='Vol_MA' + str(n))
+        dfvol = df.join(volume)
+        return dfvol
 
     def log_handler(self):
         """
