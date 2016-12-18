@@ -6,6 +6,7 @@ import time
 import datetime
 import traceback
 import pandas as pd
+from functools import reduce
 import threading
 
 
@@ -279,17 +280,60 @@ class StrategyTemplate:
         return value
 
     #获取RSI指标
-    def Get_RSI(df, n):
+    def Get_RSI(self, df, timeperiod):
         close = np.array(df['close'])
-        rsi = pd.Series(talib.RSI(close, n), index=kdf.index, name='RSI%d' % n)
+        rsi = pd.Series(talib.RSI(close, timeperiod), index=kdf.index, name='RSI%d' % timeperiod)
         dfrsi = df.join(rsi)
         return dfrsi
 
     #获取成交量移动平均值
-    def Get_Volume_MA(df, n):
-        volume = pd.Series(pd.rolling_mean(df['volume'], n), name='Vol_MA' + str(n))
+    def Get_Volume_MA(self, df, timeperiod):
+        volume = pd.Series(pd.rolling_mean(df['volume'], timeperiod), name='Vol_MA%d' % timeperiod)
         dfvol = df.join(volume)
         return dfvol
+
+    # 同花顺和通达信等软件中的SMA
+    def SMA_CN(self, df, timeperiod):
+        close = np.nan_to_num(df['close'])
+        return reduce(lambda x, y: ((timeperiod - 1) * x + y) / timeperiod, close)
+
+    # 同花顺和通达信等软件中的KDJ
+    def KDJ_CN(self, df, fastk_period, slowk_period, fastd_period):
+        high = np.nan_to_num(df['high'])
+        low = np.nan_to_num(df['low'])
+        close = np.nan_to_num(df['close'])
+        kValue, dValue = talib.STOCHF(high, low, close, fastk_period, fastd_period=1, fastd_matype=0)
+
+        kValue = np.array(list(map(lambda x: SMA_CN(kValue[:x], slowk_period), range(1, len(kValue) + 1))))
+        dValue = np.array(list(map(lambda x: SMA_CN(kValue[:x], fastd_period), range(1, len(kValue) + 1))))
+
+        jValue = 3 * kValue - 2 * dValue
+
+        func = lambda arr: np.array([0 if x < 0 else (100 if x > 100 else x) for x in arr])
+
+        kValue = pd.Series(func(kValue), index=df.index, name='K')
+        dValue = pd.Series(func(dValue), index=df.index, name='D')
+        jValue = pd.Series(func(jValue), index=df.index, name='J')
+
+        dfk = df.join(kValue)
+        dfkd = dfk.join(dValue)
+        dfkdj = dfkd.join(jValue)
+        return dfkdj
+
+    # 同花顺和通达信等软件中的MACD
+    def MACD_CN(self, df, fastperiod, slowperiod, signalperiod):
+        close = np.nan_to_num(df['close'])
+        macdDIFF, macdDEA, macd = talib.MACDEXT(close, fastperiod=fastperiod, fastmatype=1, slowperiod=slowperiod,
+                                                slowmatype=1, signalperiod=signalperiod, signalmatype=1)
+        macd = macd * 2
+        macdDIFF = pd.Series(macdDIFF, index=df.index, name='DIF')
+        macdDEA = pd.Series(macdDEA, index=df.index, name='DEA')
+        macd = pd.Series(macd, index=df.index, name='MACD')
+
+        dfmacd = df.join(macd)
+        dfmacddiff = dfmacd.join(macdDIFF)
+        df = dfmacddiff.join(macdDEA)
+        return df
 
     def log_handler(self):
         """
