@@ -6,6 +6,8 @@ import time
 import datetime
 import traceback
 import pandas as pd
+import numpy as np
+import talib
 from functools import reduce
 import threading
 
@@ -293,8 +295,8 @@ class StrategyTemplate:
         return dfvol
 
     # 同花顺和通达信等软件中的SMA
-    def SMA_CN(self, df, timeperiod):
-        close = np.nan_to_num(df['close'])
+    def SMA_CN(self, close, timeperiod):
+        close = np.nan_to_num(close)
         return reduce(lambda x, y: ((timeperiod - 1) * x + y) / timeperiod, close)
 
     # 同花顺和通达信等软件中的KDJ
@@ -334,6 +336,25 @@ class StrategyTemplate:
         dfmacddiff = dfmacd.join(macdDIFF)
         df = dfmacddiff.join(macdDEA)
         return df
+
+    def Check_MACD_Buy(self, df):
+        if self.Is_Down_Going(df['macd'], 4) or self.Is_Down_Going(df['dea'], 1):
+            return False
+        else:
+            if df['macd'][-1] >= 0.02 and df['macd'][-2] < 0:
+                return True
+
+    def Is_Up_Going(self, numpy_data, n):
+        for i in range(n-1):
+            if numpy_data[-1-i] <= numpy_data[-2-i]:
+                return False
+        return True
+
+    def Is_Down_Going(self, numpy_data, n):
+        for i in range(n):
+            if numpy_data[-1-i] >= numpy_data[-2-i]:
+                return False
+        return True
 
     def log_handler(self):
         """

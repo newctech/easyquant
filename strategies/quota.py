@@ -23,8 +23,8 @@ class Strategy(StrategyTemplate):
         self.clock_engine.register_moment(clock_type, moment)
 
         # 注册时钟事件
-        clock_type = "closed" #存储K线数据
-        moment = dt.time(15, 10, 0, tzinfo=tz.tzlocal())
+        clock_type = "update" #存储K线数据
+        moment = dt.time(15, 15, 0, tzinfo=tz.tzlocal())
         self.clock_engine.register_moment(clock_type, moment)
 
         # 注册时钟间隔事件, 不在交易阶段也会触发, clock_type == minute_interval
@@ -34,6 +34,10 @@ class Strategy(StrategyTemplate):
         self.source = easyquotation.use('xq')
         self.shbuying = False
         self.szbuying = False
+        self.updatetime = False
+
+        self.buy_stock_list = []
+        self.buy_stock_count = 2
 
 
         self.__backups_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..")) + '/easyquant/config/backups.json'
@@ -120,8 +124,26 @@ class Strategy(StrategyTemplate):
                 self.szbuying = True
             else:
                 self.szbuying = False
+
+
         elif event.event_type == 'all':
-            pass
+            if self.updatetime == True:
+                self.update(event.data)
+                self.updatetime = False
+            if stock in event.data:
+                symbol = stock['stock']['symbol']
+                if symbol[:2] == 'SH':
+                    if self.shbuying == False:
+                        pass
+                    else:
+                        df = self.Caldata(symbol, stock)
+                        self.Calquota(symbol, df)
+                elif symbol[:2] == 'SZ':
+                    if self.szbuying == False:
+                        pass
+                    else:
+                        df = self.Caldata(symbol, stock)
+                        self.Calquota(symbol, df)
 
     def clock(self, event):
         """在交易时间会定时推送 clock 事件
@@ -134,15 +156,41 @@ class Strategy(StrategyTemplate):
             self.set_Big_detail(0)
             self.set_Medium_detail(0)
             self.set_Small_detail(0)
+
             self.log.info('Detail_Orders_Statistics init')
         elif event.data.clock_event == 'close':
             # 收市了
             #self.log.info('StoreData_Close')
             pass
+        elif event.data.clock_event == 'update':
+            self.updatetime = True
+
         elif event.data.clock_event == 1:
             # 5 分钟的 clock
             #self.log.info("StoreData_5min")
             pass
+
+    def update(self, stocks):
+        for stock in stocks:
+            symbol_key = stock['stock']['symbol']
+            for data in stock['chartlist']:
+                self.kdata_write_hdf5(data, symbol_key)
+
+
+    def Caldata(self, symbol, stock):
+        basedf = self.kdata_read_hdf5(symbol)
+        stock.pop('time')
+        series = pd.Series(stock, name='data')
+        dfdata = basedf.append(series)
+        dfdatavol = self.Get_Volume_MA(dfdata, 30)
+        df = self.KDJ_CN(dfdatavol, 9, 3, 3)
+        return df
+
+    def Calquota(self, symbol, df):
+        if self.Is_Up_Going(df['ma10'], 3) and df['ma5'][-1] > df['ma10'][-1]:
+            if self.Check_MACD_Buy(df):
+                self.buy_stock_list.append(symbol)
+                self.log.info("buy_stock_list: %s" % self.buy_stock_list)
 
     def log_handler(self):
         """自定义 log 记录方式"""
