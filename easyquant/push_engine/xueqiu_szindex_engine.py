@@ -7,7 +7,7 @@ import datetime
 from .base_engine import BaseEngine
 from easyquant.event_engine import Event
 
-class XueqiuKdataEngine(BaseEngine):
+class XueqiuSZindexEngine(BaseEngine):
     """雪球k线行情推送引擎"""
     EventType = 'szindex'
     PushInterval = 1
