@@ -32,7 +32,9 @@ class Strategy(StrategyTemplate):
         self.clock_engine.register_interval(minute_interval, trading=False)
 
         self.source = easyquotation.use('xq')
-        self.symbol = 'SH601211'
+        self.shbuying = False
+        self.szbuying = False
+
 
         self.__backups_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..")) + '/easyquant/config/backups.json'
 
@@ -98,15 +100,27 @@ class Strategy(StrategyTemplate):
 
         elif event.event_type == 'realtime':
             #self.log.info('StoreData_Realtime: %s' % event.data)
-            #self.realtime_write_hdf5(event.data, self.symbol)
             pass
         elif event.event_type == 'kdata':
         #    self.log.info('xueqiu_kdata: %s' % event.data)
-        #    self.kdata_write_hdf5(event.data, self.symbol)
             pass
         elif event.event_type == 'general':
             #self.log.info('StoreData_General: %s' % event.data)
             #self.general_write_hdf5(event.data)
+            pass
+
+
+        elif event.event_type == 'shindex':
+            if event.data['macd'] > 0.1:
+                self.shbuying = True
+            else:
+                self.shbuying = False
+        elif event.event_type == 'szindex':
+            if event.data['macd'] > 0.1:
+                self.szbuying = True
+            else:
+                self.szbuying = False
+        elif event.event_type == 'all':
             pass
 
     def clock(self, event):
