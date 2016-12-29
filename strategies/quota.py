@@ -130,8 +130,9 @@ class Strategy(StrategyTemplate):
             if self.updatetime == True:
                 self.update(event.data)
                 self.updatetime = False
-            if stock in event.data:
-                symbol = stock['stock']['symbol']
+            for stock_data in event.data:
+                symbol = stock_data['stock']['symbol']
+                stock = stock_data['chartlist'][-1]
                 if symbol[:2] == 'SH':
                     if self.shbuying == False:
                         pass
