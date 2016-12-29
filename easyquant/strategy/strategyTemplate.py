@@ -284,13 +284,13 @@ class StrategyTemplate:
     #获取RSI指标
     def Get_RSI(self, df, timeperiod):
         close = np.array(df['close'])
-        rsi = pd.Series(talib.RSI(close, timeperiod), index=kdf.index, name='RSI%d' % timeperiod)
+        rsi = pd.Series(talib.RSI(close, timeperiod), index=df.index, name='RSI%d' % timeperiod)
         dfrsi = df.join(rsi)
         return dfrsi
 
     #获取成交量移动平均值
     def Get_Volume_MA(self, df, timeperiod):
-        volume = pd.Series(pd.rolling_mean(df['volume'], timeperiod), name='Vol_MA%d' % timeperiod)
+        volume = pd.Series(pd.rolling_mean(df['volume'], timeperiod), index=df.index, name='Vol_MA%d' % timeperiod)
         dfvol = df.join(volume)
         return dfvol
 
@@ -306,8 +306,8 @@ class StrategyTemplate:
         close = np.nan_to_num(df['close'])
         kValue, dValue = talib.STOCHF(high, low, close, fastk_period, fastd_period=1, fastd_matype=0)
 
-        kValue = np.array(list(map(lambda x: SMA_CN(kValue[:x], slowk_period), range(1, len(kValue) + 1))))
-        dValue = np.array(list(map(lambda x: SMA_CN(kValue[:x], fastd_period), range(1, len(kValue) + 1))))
+        kValue = np.array(list(map(lambda x: self.SMA_CN(kValue[:x], slowk_period), range(1, len(kValue) + 1))))
+        dValue = np.array(list(map(lambda x: self.SMA_CN(kValue[:x], fastd_period), range(1, len(kValue) + 1))))
 
         jValue = 3 * kValue - 2 * dValue
 

@@ -6,6 +6,8 @@ from dateutil import tz
 from easyquant import DefaultLogHandler
 from easyquant import StrategyTemplate
 import easyquotation
+import pandas as pd
+import numpy as np
 
 
 class Strategy(StrategyTemplate):
@@ -132,18 +134,20 @@ class Strategy(StrategyTemplate):
                 self.updatetime = False
             for stock_data in event.data:
                 symbol = stock_data['stock']['symbol']
-                stock = stock_data['chartlist'][-1]
+                stock = stock_data['chartlist']
+                if len(stock) == 0:
+                    continue
                 if symbol[:2] == 'SH':
                     if self.shbuying == False:
                         pass
                     else:
-                        df = self.Caldata(symbol, stock)
+                        df = self.Caldata(symbol, stock[-1])
                         self.Calquota(symbol, df)
                 elif symbol[:2] == 'SZ':
                     if self.szbuying == False:
                         pass
                     else:
-                        df = self.Caldata(symbol, stock)
+                        df = self.Caldata(symbol, stock[-1])
                         self.Calquota(symbol, df)
 
     def clock(self, event):
