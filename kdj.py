@@ -1,6 +1,6 @@
 # coding:utf-8
 import easyquant
-from easyquant import DefaultQuotationEngine, DefaultLogHandler, PushBaseEngine, XueqiuAllEngine, XueqiuPankouEngine, XueqiuDetailEngine, XueqiuRealtimeEngine, XueqiuKdataEngine, XueqiuGeneralEngine
+from easyquant import DefaultQuotationEngine, DefaultLogHandler, PushBaseEngine, XueqiuAllEngine, XueqiuSHindexEngine, XueqiuSZindexEngine, XueqiuPankouEngine, XueqiuDetailEngine, XueqiuRealtimeEngine, XueqiuKdataEngine, XueqiuGeneralEngine
 
 print('开始启动......')
 broker = 'xq'

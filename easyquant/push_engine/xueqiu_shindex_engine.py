@@ -15,7 +15,7 @@ class XueqiuSHindexEngine(BaseEngine):
     def init(self):
         self.source = easyquotation.use('xq')
         self.pause = 0.001
-        self.stocks = ['SH000001']
+        self.stocks = 'SH000001'
 
     def fetch_quotation(self):
         return self.source.get_k_data(self.stocks)
