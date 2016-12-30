@@ -185,7 +185,8 @@ class Strategy(StrategyTemplate):
     def Caldata(self, symbol, stock):
         basedf = self.kdata_read_hdf5(symbol)
         stock.pop('time')
-        series = pd.Series(stock, name='data')
+        timestamp = pd.Timestamp(time.time())
+        series = pd.DataFrame(stock, index=[timestamp])
         dfdata = basedf.append(series)
         dfdatavol = self.Get_Volume_MA(dfdata, 30)
         df = self.KDJ_CN(dfdatavol, 9, 3, 3)
@@ -194,7 +195,8 @@ class Strategy(StrategyTemplate):
     def Calquota(self, symbol, df):
         if self.Is_Up_Going(df['ma10'], 3) and df['ma5'][-1] > df['ma10'][-1]:
             if self.Check_MACD_Buy(df):
-                self.buy_stock_list.append(symbol)
+                if symbol not in self.buy_stock_list:
+                    self.buy_stock_list.append(symbol)
                 self.log.info("buy_stock_list: %s" % self.buy_stock_list)
 
     def log_handler(self):

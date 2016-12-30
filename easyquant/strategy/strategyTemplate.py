@@ -341,7 +341,7 @@ class StrategyTemplate:
         if self.Is_Down_Going(df['macd'], 4) or self.Is_Down_Going(df['dea'], 1):
             return False
         else:
-            if df['macd'][-1] >= 0.02 and df['macd'][-2] < 0:
+            if df['macd'][-1] >= 0.02 and df['macd'][-2] <= 0:
                 return True
 
     def Is_Up_Going(self, numpy_data, n):

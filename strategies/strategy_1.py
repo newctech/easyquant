@@ -72,8 +72,8 @@ class Strategy(StrategyTemplate):
             self.log.info('Strategy1_Kdata: %s' % event.data)
         elif event.event_type == 'general':
             self.log.info('Strategy1_General: %s' % event.data)
-        elif event.event_type == 'all':
-            self.log.info('Strategy1_General: %s' % event.data)
+        #elif event.event_type == 'all':
+        #    self.log.info('Strategy1_General: %s' % event.data)
         #self.log.info('行情数据: 万科价格: %s' % event.data['000002'])
         #self.log.info('检查持仓')
         #self.log.info(self.user.balance)
