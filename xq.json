@@ -1,6 +1,7 @@
 {
+  "username": "邮箱",
   "account": "手机号",
-  "password": "加密后的密码",
+  "password": "密码",
   "portfolio_code": "组合代码(例:ZH818559)",
-  "stocks": "股票代码（例:600848 或SH000001)"
+  "portfolio_market": "交易市场(例:us 或者 cn 或者 hk)"
 }

@@ -8,6 +8,7 @@ import threading
 import time
 from collections import OrderedDict
 from threading import Thread, Lock
+from queue import Queue, Empty
 
 import easytrader
 from logbook import Logger, StreamHandler
@@ -48,7 +49,7 @@ class MainEngine:
         else:
             self.user = None
             self.log.info('选择了无交易模式')
-        self.stocks = self.user.account_config['stocks']
+            self.feedback_queue = Queue()
 
         self.event_engine = EventEngine()
         self.clock_engine = ClockEngine(self.event_engine, tzinfo)
@@ -65,7 +66,7 @@ class MainEngine:
                 raise ValueError("行情引擎 EventType 重复:" + types)
         self.quotation_engines = []
         for quotation_engine in quotation_engines:
-            self.quotation_engines.append(quotation_engine(self.event_engine, self.clock_engine, self.stocks))
+            self.quotation_engines.append(quotation_engine(self.event_engine, self.clock_engine, self.feedback_queue))
 
         # 保存读取的策略类
         self.strategies = OrderedDict()
@@ -154,7 +155,7 @@ class MainEngine:
             if names is None or strategy_class.name in names:
                 self.strategies[strategy_module_name] = strategy_class
                 # 缓存加载信息
-                new_strategy = strategy_class(user=self.user, log_handler=self.log, main_engine=self)
+                new_strategy = strategy_class(user=self.user, log_handler=self.log, main_engine=self, feedback_queue=self.feedback_queue)
                 self.strategy_list.append(new_strategy)
                 self._cache[strategy_file] = mtime
                 self.strategy_listen_event(new_strategy, "listen")

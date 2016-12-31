@@ -7,7 +7,7 @@ from easyquant import StrategyTemplate
 
 
 class Strategy(StrategyTemplate):
-    name = 'Strategy1'
+    name = 'buy_stock'
 
     def init(self):
         # 通过下面的方式来获取时间戳
@@ -25,59 +25,24 @@ class Strategy(StrategyTemplate):
         self.clock_engine.register_interval(minute_interval, trading=False)
 
     def strategy(self, event):
-        """:param event event.data 为所有股票的信息，结构如下
-        {'162411':
-        {'ask1': '0.493',
-         'ask1_volume': '75500',
-         'ask2': '0.494',
-         'ask2_volume': '7699281',
-         'ask3': '0.495',
-         'ask3_volume': '2262666',
-         'ask4': '0.496',
-         'ask4_volume': '1579300',
-         'ask5': '0.497',
-         'ask5_volume': '901600',
-         'bid1': '0.492',
-         'bid1_volume': '10765200',
-         'bid2': '0.491',
-         'bid2_volume': '9031600',
-         'bid3': '0.490',
-         'bid3_volume': '16784100',
-         'bid4': '0.489',
-         'bid4_volume': '10049000',
-         'bid5': '0.488',
-         'bid5_volume': '3572800',
-         'buy': '0.492',
-         'close': '0.499',
-         'high': '0.494',
-         'low': '0.489',
-         'name': '华宝油气',
-         'now': '0.493',
-         'open': '0.490',
-         'sell': '0.493',
-         'turnover': '420004912',
-         'volume': '206390073.351'}}
-        """
         # 使用 self.user 来操作账户，用法同 easytrader 用法
         # 使用 self.log.info('message') 来打印你所需要的 log
         #print('demo1 的 log 使用自定义 log 的方式记录在 demo1.log')
         #self.log.info('策略1触发')
         if event.event_type == 'pankou':
-            self.log.info('Strategy1_Pankou: %s' % event.data)
+            self.log.info('buy_stock_Pankou: %s' % event.data)
         elif event.event_type == 'detail':
-            self.log.info('Strategy1_Detail: %s' % event.data)
+            self.log.info('buy_stock_Detail: %s' % event.data)
         elif event.event_type == 'realtime':
-            self.log.info('Strategy1_Realtime: %s' % event.data)
+            self.log.info('buy_stock_Realtime: %s' % event.data)
         elif event.event_type == 'kdata':
-            self.log.info('Strategy1_Kdata: %s' % event.data)
+            self.log.info('buy_stock_Kdata: %s' % event.data)
         elif event.event_type == 'general':
-            self.log.info('Strategy1_General: %s' % event.data)
-        #elif event.event_type == 'all':
-        #    self.log.info('Strategy1_General: %s' % event.data)
-        #self.log.info('行情数据: 万科价格: %s' % event.data['000002'])
-        #self.log.info('检查持仓')
-        #self.log.info(self.user.balance)
-        #self.log.info('\n')
+            self.log.info('buy_stock_General: %s' % event.data)
+
+
+        elif event.event_type == 'feedback':
+            self.log.info('Buy_stock_Feedback: %s' % event.data)
 
     def clock(self, event):
         """在交易时间会定时推送 clock 事件
@@ -94,10 +59,10 @@ class Strategy(StrategyTemplate):
             # 5 分钟的 clock
             self.log.info("Strategy1_5min")
 
-#    def log_handler(self):
-#        """自定义 log 记录方式"""
-#        log = self.name + '.log'
-#        return DefaultLogHandler(self.name, log_type='file', filepath=log)
+    def log_handler(self):
+        """自定义 log 记录方式"""
+        log = self.name + '.log'
+        return DefaultLogHandler(self.name, log_type='file', filepath=log)
 
     def shutdown_strategy(self):
         """

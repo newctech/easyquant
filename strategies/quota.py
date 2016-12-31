@@ -192,6 +192,7 @@ class Strategy(StrategyTemplate):
     def Add_list_buy(self, symbol):
         if symbol not in self.buy_stock_list:
             self.buy_stock_list.append(symbol)
+            self.feedback_queue.put(symbol)
             self.log.info("buy_stock_list: %s" % self.buy_stock_list)
 
         #卖出策略
