@@ -7,7 +7,7 @@ from queue import Queue, Empty
 from .base_engine import BaseEngine
 from easyquant.event_engine import Event
 
-class XueqiuGeneralEngine(BaseEngine):
+class XueqiuFeedbackEngine(BaseEngine):
     """雪球股票概要行情反馈推送引擎"""
     EventType = 'feedback'
 

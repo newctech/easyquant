@@ -1,13 +1,13 @@
 # coding:utf-8
 import easyquant
-from easyquant import DefaultQuotationEngine, DefaultLogHandler, PushBaseEngine, XueqiuAllEngine, XueqiuSHindexEngine, XueqiuSZindexEngine, XueqiuPankouEngine, XueqiuDetailEngine, XueqiuRealtimeEngine, XueqiuKdataEngine, XueqiuGeneralEngine
+from easyquant import DefaultQuotationEngine, DefaultLogHandler, PushBaseEngine, XueqiuAllEngine, XueqiuSHindexEngine, XueqiuSZindexEngine, XueqiuFeedbackEngine, XueqiuPankouEngine, XueqiuDetailEngine, XueqiuRealtimeEngine, XueqiuKdataEngine, XueqiuGeneralEngine
 
 print('开始启动......')
 broker = 'xq'
 need_data = 'xq.json'
 
 #quotation_engine = [XueqiuPankouEngine, XueqiuDetailEngine, XueqiuRealtimeEngine, XueqiuKdataEngine, XueqiuGeneralEngi]
-quotation_engine = [XueqiuAllEngine, XueqiuSHindexEngine, XueqiuSZindexEngine]
+quotation_engine = [XueqiuAllEngine, XueqiuSHindexEngine, XueqiuSZindexEngine, XueqiuFeedbackEngine]
 
 log_type_choose = input('请输入 log 记录方式: 1: 显示在屏幕 2: 记录到指定文件\n: ')
 log_type = 'stdout' if log_type_choose == '1' else 'file'
