@@ -342,10 +342,10 @@ class StrategyTemplate:
             return True
 
     def Check_KDJ_Buy(self, df):
-        if self.Is_Down_Going(df['K'], 2):
+        if self.Is_Down_Going(df['D'], 2):
             return False
         else:
-            if df['D'][-1] >= (df['K'][-1] * 1.05):
+            if df['K'][-1] >= (df['D'][-1] * 1.05):
                 return True
 
     def Check_KDJ_Sell(self, df):
@@ -364,24 +364,32 @@ class StrategyTemplate:
             return True
 
     def Check_Rise_Stop(self, numpy_percent, n):
+        if len(numpy_percent) < n:
+            return False
         for i in range(n-1):
             if numpy_percent[-1-i] >= 9.95:
                 return True
         return False
 
     def Check_Fall_Stop(self, numpy_percent, n):
+        if len(numpy_percent) < n:
+            return False
         for i in range(n-1):
             if numpy_percent[-1-i] <= -9.95:
                 return True
         return False
 
     def Is_Up_Going(self, numpy_data, n):
+        if len(numpy_data) < n+1:
+            return False
         for i in range(n-1):
             if numpy_data[-1-i] <= numpy_data[-2-i]:
                 return False
         return True
 
     def Is_Down_Going(self, numpy_data, n):
+        if len(numpy_data) < n+1:
+            return False
         for i in range(n):
             if numpy_data[-1-i] >= numpy_data[-2-i]:
                 return False

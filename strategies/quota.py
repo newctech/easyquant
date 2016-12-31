@@ -53,39 +53,6 @@ class Strategy(StrategyTemplate):
         self.__backups_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..")) + '/easyquant/config/backups.json'
 
     def strategy(self, event):
-        """:param event event.data 为所有股票的信息，结构如下
-        {'162411':
-        {'ask1': '0.493',
-         'ask1_volume': '75500',
-         'ask2': '0.494',
-         'ask2_volume': '7699281',
-         'ask3': '0.495',
-         'ask3_volume': '2262666',
-         'ask4': '0.496',
-         'ask4_volume': '1579300',
-         'ask5': '0.497',
-         'ask5_volume': '901600',
-         'bid1': '0.492',
-         'bid1_volume': '10765200',
-         'bid2': '0.491',
-         'bid2_volume': '9031600',
-         'bid3': '0.490',
-         'bid3_volume': '16784100',
-         'bid4': '0.489',
-         'bid4_volume': '10049000',
-         'bid5': '0.488',
-         'bid5_volume': '3572800',
-         'buy': '0.492',
-         'close': '0.499',
-         'high': '0.494',
-         'low': '0.489',
-         'name': '华宝油气',
-         'now': '0.493',
-         'open': '0.490',
-         'sell': '0.493',
-         'turnover': '420004912',
-         'volume': '206390073.351'}}
-        """
         # 使用 self.user 来操作账户，用法同 easytrader 用法
         # 使用 self.log.info('message') 来打印你所需要的 log
         #print('demo1 的 log 使用自定义 log 的方式记录在 demo1.log')
@@ -146,7 +113,7 @@ class Strategy(StrategyTemplate):
                 stock = stock_data['chartlist']
                 if len(stock) == 0:
                     continue
-                cal_quota = self.Calquota_base(symbol, stock)
+                cal_quota = self.Calquota_base(symbol, stock[-1])
                 if cal_quota == None:
                     continue
                 elif cal_quota == 'Calquota_buy':
@@ -197,7 +164,7 @@ class Strategy(StrategyTemplate):
         timestamp = pd.Timestamp('1970-01-01')
         series = pd.DataFrame(stock, index=[timestamp])
         dfdata = basedf.append(series)
-        dfdatavol = self.Get_Volume_MA(dfdata, 10)
+        dfdatavol = self.Get_Volume_MA(dfdata, 5)
         df = self.KDJ_CN(dfdatavol, 9, 3, 3)
         return df
 
@@ -214,10 +181,10 @@ class Strategy(StrategyTemplate):
         if self.Is_Up_Going(df['ma10'], 3) and df['ma5'][-2] > df['ma10'][-2]:
             if self.Check_MACD_Buy(df) and self.Check_KDJ_Buy(df):
                 if self.ischeckVol:
-                    if self.Check_Vol_Buy(df, 10, 1.1):
-                        Add_list_buy(symbol)
+                    if self.Check_Vol_Buy(df, 5, 1.1):
+                        self.Add_list_buy(symbol)
                 else:
-                    Add_list_buy(symbol)
+                    self.Add_list_buy(symbol)
 
         #加入买入列表
     def Add_list_buy(self, symbol):
