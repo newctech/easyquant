@@ -178,10 +178,12 @@ class Strategy(StrategyTemplate):
 
         #买入策略
     def Calquota_buy(self, symbol, df):
-        if self.Is_Up_Going(df['ma10'], 3) and df['ma5'][-2] > df['ma10'][-2]:
+        if self.Is_Down_Going(df['ma10'], 3):
+            pass
+        else:
             if self.Check_MACD_Buy(df) and self.Check_KDJ_Buy(df):
                 if self.ischeckVol:
-                    if self.Check_Vol_Buy(df, 5, 1.1):
+                    if self.Check_Vol_Buy(df, 5, 1.2):
                         self.Add_list_buy(symbol)
                 else:
                     self.Add_list_buy(symbol)
