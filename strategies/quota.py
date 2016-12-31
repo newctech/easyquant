@@ -21,7 +21,7 @@ class Strategy(StrategyTemplate):
 
         # 注册时钟事件
         clock_type = "closing" #尾盘
-        moment = dt.time(14, 56, 30, tzinfo=tz.tzlocal())
+        moment = dt.time(14, 55, 00, tzinfo=tz.tzlocal())
         self.clock_engine.register_moment(clock_type, moment)
 
         # 注册时钟事件
@@ -36,10 +36,18 @@ class Strategy(StrategyTemplate):
         self.source = easyquotation.use('xq')
         self.shbuying = False
         self.szbuying = False
+        self.ischeckVol = False
         self.updatetime = False
 
+        #买入股票列表
         self.buy_stock_list = []
-        self.buy_stock_count = 2
+        self.buy_stock_countMax = 2
+        #持有股票列表
+        self.hold_stock_list = []
+        self.hold_stock_countMax = 10
+        #卖出股票列表
+        self.sell_stock_list = []
+        self.sell_stock_countMax = 10
 
 
         self.__backups_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..")) + '/easyquant/config/backups.json'
@@ -129,6 +137,7 @@ class Strategy(StrategyTemplate):
 
 
         elif event.event_type == 'all':
+            self.buy_stock_list = []
             if self.updatetime == True:
                 self.update(event.data)
                 self.updatetime = False
@@ -137,18 +146,15 @@ class Strategy(StrategyTemplate):
                 stock = stock_data['chartlist']
                 if len(stock) == 0:
                     continue
-                if symbol[:2] == 'SH':
-                    if self.shbuying == False:
-                        pass
-                    else:
-                        df = self.Caldata(symbol, stock[-1])
-                        self.Calquota(symbol, df)
-                elif symbol[:2] == 'SZ':
-                    if self.szbuying == False:
-                        pass
-                    else:
-                        df = self.Caldata(symbol, stock[-1])
-                        self.Calquota(symbol, df)
+                cal_quota = self.Calquota_base(symbol, stock)
+                if cal_quota == None:
+                    continue
+                elif cal_quota == 'Calquota_buy':
+                    df = self.Caldata(symbol, stock[-1])
+                    self.Calquota_buy(symbol, df)
+                elif cal_quota == 'Calquota_sell':
+                    df = self.Caldata(symbol, stock[-1])
+                    self.Calquota_sell(symbol, df)
 
     def clock(self, event):
         """在交易时间会定时推送 clock 事件
@@ -167,11 +173,14 @@ class Strategy(StrategyTemplate):
             # 收市了
             #self.log.info('StoreData_Close')
             pass
+
+        elif event.data.clock_event == 'closing':
+            self.ischeckVol = True
         elif event.data.clock_event == 'update':
             self.updatetime = True
 
         elif event.data.clock_event == 1:
-            # 5 分钟的 clock
+            # 1 分钟的 clock
             #self.log.info("StoreData_5min")
             pass
 
@@ -181,23 +190,51 @@ class Strategy(StrategyTemplate):
             for data in stock['chartlist']:
                 self.kdata_write_hdf5(data, symbol_key)
 
-
+        #数据计算
     def Caldata(self, symbol, stock):
-        basedf = self.kdata_read_hdf5(symbol)
+        basedf = self.kdata_read_hdf5(symbol)[-30:]
         stock.pop('time')
-        timestamp = pd.Timestamp(time.time())
+        timestamp = pd.Timestamp('1970-01-01')
         series = pd.DataFrame(stock, index=[timestamp])
         dfdata = basedf.append(series)
-        dfdatavol = self.Get_Volume_MA(dfdata, 30)
+        dfdatavol = self.Get_Volume_MA(dfdata, 10)
         df = self.KDJ_CN(dfdatavol, 9, 3, 3)
         return df
 
-    def Calquota(self, symbol, df):
-        if self.Is_Up_Going(df['ma10'], 3) and df['ma5'][-1] > df['ma10'][-1]:
-            if self.Check_MACD_Buy(df):
-                if symbol not in self.buy_stock_list:
-                    self.buy_stock_list.append(symbol)
-                self.log.info("buy_stock_list: %s" % self.buy_stock_list)
+        #初始化调用策略入口
+    def Calquota_base(self, symbol, stock):
+        if symbol in self.hold_stock_list:
+            return 'Calquota_sell'
+        if stock['macd'] > 0 and stock['ma5'] > stock['ma10']:
+            return 'Calquota_buy'
+        return None
+
+        #买入策略
+    def Calquota_buy(self, symbol, df):
+        if self.Is_Up_Going(df['ma10'], 3) and df['ma5'][-2] > df['ma10'][-2]:
+            if self.Check_MACD_Buy(df) and self.Check_KDJ_Buy(df):
+                if self.ischeckVol:
+                    if self.Check_Vol_Buy(df, 10, 1.1):
+                        Add_list_buy(symbol)
+                else:
+                    Add_list_buy(symbol)
+
+        #加入买入列表
+    def Add_list_buy(self, symbol):
+        if symbol not in self.buy_stock_list:
+            self.buy_stock_list.append(symbol)
+            self.log.info("buy_stock_list: %s" % self.buy_stock_list)
+
+        #卖出策略
+    def Calquota_sell(self, symbol, df):
+        if self.Check_MACD_Sell(df) or self.Check_KDJ_Sell(df):
+            Add_list_sell(symbol)
+
+        #加入卖出列表
+    def Add_list_sell(self, symbol):
+        if symbol not in self.sell_stock_list:
+            self.sell_stock_list.append(symbol)
+            self.log.info("sell_stock_list: %s" % self.buy_stock_list)
 
     def log_handler(self):
         """自定义 log 记录方式"""

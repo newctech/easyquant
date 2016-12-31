@@ -337,12 +337,43 @@ class StrategyTemplate:
         df = dfmacddiff.join(macdDEA)
         return df
 
+    def Check_Vol_Buy(self, df, timeperiod, ratio):
+        if df['volume'][-1] > df['Vol_MA%s' % timeperiod][-1] * ratio:
+            return True
+
+    def Check_KDJ_Buy(self, df):
+        if self.Is_Down_Going(df['K'], 2):
+            return False
+        else:
+            if df['D'][-1] >= (df['K'][-1] * 1.05):
+                return True
+
+    def Check_KDJ_Sell(self, df):
+        if self.Is_Down_Going(df['J'], 3):
+            return True
+
     def Check_MACD_Buy(self, df):
         if self.Is_Down_Going(df['macd'], 4) or self.Is_Down_Going(df['dea'], 1):
             return False
         else:
             if df['macd'][-1] >= 0.02 and df['macd'][-2] <= 0:
                 return True
+
+    def Check_MACD_Sell(self, df):
+        if df['macd'][-1] < 0:
+            return True
+
+    def Check_Rise_Stop(self, numpy_percent, n):
+        for i in range(n-1):
+            if numpy_percent[-1-i] >= 9.95:
+                return True
+        return False
+
+    def Check_Fall_Stop(self, numpy_percent, n):
+        for i in range(n-1):
+            if numpy_percent[-1-i] <= -9.95:
+                return True
+        return False
 
     def Is_Up_Going(self, numpy_data, n):
         for i in range(n-1):
