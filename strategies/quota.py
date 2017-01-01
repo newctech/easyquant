@@ -172,7 +172,7 @@ class Strategy(StrategyTemplate):
         if symbol in self.hold_stock_list:
             return 'Calquota_sell'
         if stock['macd'] > 0 and stock['ma5'] > stock['ma10'] and \
-                        stock['close'] > stock['open'] + (stock['high'] - stock['open']) * 0.8:
+                        stock['close'] > stock['open'] + (stock['high'] - stock['open']) * 0.7:
             return 'Calquota_buy'
         return None
 
