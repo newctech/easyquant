@@ -13,12 +13,14 @@ class XueqiuFeedbackEngine(BaseEngine):
 
     def init(self):
         self.source_xq = easyquotation.use('xq')
+        self.source_mysina = easyquotation.use('mysina')
         self.pause = 0.001
 
     def fetch_quotation(self):
         res_dict = {}
         res_dict['xueqiu_general'] = self.source_xq.get_general_data(self.stocks)[-1]
         res_dict['xueqiu_realtime'] = self.source_xq.get_realtime_data(self.stocks)[-1]
+        res_dict['mysina_dadan'] = self.source_mysina.get_dadan_data(self.stocks, volume='40000')
         return res_dict
 
     def push_quotation(self):
