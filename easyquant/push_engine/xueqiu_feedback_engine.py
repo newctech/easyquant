@@ -12,20 +12,22 @@ class XueqiuFeedbackEngine(BaseEngine):
     EventType = 'feedback'
 
     def init(self):
-        self.source = easyquotation.use('xq')
+        self.source_xq = easyquotation.use('xq')
         self.pause = 0.001
 
     def fetch_quotation(self):
-        return self.source.get_general_data(self.stocks)
+        res_dict = {}
+        res_dict['xueqiu_general'] = self.source_xq.get_general_data(self.stocks)[-1]
+        res_dict['xueqiu_realtime'] = self.source_xq.get_realtime_data(self.stocks)[-1]
+        return res_dict
 
     def push_quotation(self):
         while self.is_active:
             try:
                 self.stocks = self.feedback_queue.get(block=True, timeout=1)
-                response_lists = self.fetch_quotation()
+                response = self.fetch_quotation()
             except Empty:
                 continue
-            for response in response_lists:
-                event = Event(event_type=self.EventType, data=response)
-                self.event_engine.put(event)
-                time.sleep(self.pause)
+            event = Event(event_type=self.EventType, data=response)
+            self.event_engine.put(event)
+            time.sleep(self.pause)

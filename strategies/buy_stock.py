@@ -62,10 +62,14 @@ class Strategy(StrategyTemplate):
             else:
                 self.szbuying = False
         elif event.event_type == 'feedback':
-            if event.data['name'][:2] == 'ST':
+            if event.data['xueqiu_general']['name'][:2] == 'ST':
                 pass
             else:
-                self.Call_buy(event.data['symbol'])
+                self.Call_buy_pre(event.data)
+
+    def Call_buy_pre(self, data):
+        if data['xueqiu_realtime']['current'] > data['xueqiu_realtime']['avg_price']:
+            self.Call_buy(data['xueqiu_general']['symbol'])
 
     def Call_buy(self, symbol):
         if self.buy_stock_countMax > 0 and symbol not in self.buy_stock_list and \
