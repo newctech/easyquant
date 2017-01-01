@@ -37,6 +37,7 @@ class MainEngine:
         """
         self.log = log_handler
         self.broker = broker
+        self.feedback_queue = Queue()
 
         # 登录账户
         if (broker is not None) and (need_data is not None):
@@ -49,7 +50,6 @@ class MainEngine:
         else:
             self.user = None
             self.log.info('选择了无交易模式')
-            self.feedback_queue = Queue()
 
         self.event_engine = EventEngine()
         self.clock_engine = ClockEngine(self.event_engine, tzinfo)

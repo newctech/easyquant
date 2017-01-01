@@ -2,7 +2,7 @@
 import time
 import datetime as dt
 from dateutil import tz
-#from easyquant import DefaultLogHandler
+from easyquant import DefaultLogHandler
 from easyquant import StrategyTemplate
 
 
