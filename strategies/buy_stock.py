@@ -65,18 +65,18 @@ class Strategy(StrategyTemplate):
             if event.data['name'][:2] == 'ST':
                 pass
             else:
-                Call_buy(event.data['symbol'])
+                self.Call_buy(event.data['symbol'])
 
     def Call_buy(self, symbol):
         if self.buy_stock_countMax > 0 and symbol not in self.buy_stock_list and \
-                        len(self.hold_stock_list) < self.buy_stock_countMax and symbol not in self.hold_stock_list:
+                        len(self.hold_stock_list) < self.hold_stock_countMax and symbol not in self.hold_stock_list:
             self.user.adjust_weight(symbol, 10)
             self.buy_stock_list.append(symbol)
             self.buy_stock_countMax -= 1
             self.hold_stock_list.append(symbol)
             self.log.info("Buy stock %s : buy_stock_list %s" % (symbol, self.buy_stock_list))
         else:
-            self.log.info("Not buy : buy_stock_list %s" % self.buy_stock_list)
+            self.log.info("Not buy %s : buy_stock_list %s" % (symbol, self.buy_stock_list))
 
 
 
