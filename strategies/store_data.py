@@ -5,11 +5,10 @@ import datetime as dt
 from dateutil import tz
 #from easyquant import DefaultLogHandler
 from easyquant import StrategyTemplate
-import easyquotation
 
 
 class Strategy(StrategyTemplate):
-    name = 'StoreData'
+    name = 'storeData'
 
     def init(self):
         # 通过下面的方式来获取时间戳
@@ -26,7 +25,6 @@ class Strategy(StrategyTemplate):
         minute_interval = 1.5
         self.clock_engine.register_interval(minute_interval, trading=False)
 
-        self.source = easyquotation.use('xq')
         self.symbol = 'SH601211'
 
     def strategy(self, event):

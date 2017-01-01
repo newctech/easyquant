@@ -64,6 +64,9 @@ class StrategyTemplate:
         self.__general_lock = threading.Lock()
 
     def quota_init(self):
+        self.shbuying = False
+        self.szbuying = False
+
         self.__opentime = datetime.time(9,0,0)
         self.__closetime = datetime.time(15, 0, 0)
         self.__now = datetime.datetime.now().time()

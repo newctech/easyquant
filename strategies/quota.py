@@ -5,15 +5,29 @@ import datetime as dt
 from dateutil import tz
 from easyquant import DefaultLogHandler
 from easyquant import StrategyTemplate
-import easyquotation
 import pandas as pd
 import numpy as np
 
 
 class Strategy(StrategyTemplate):
-    name = 'Quota'
+    name = 'quota'
 
     def init(self):
+        #买入股票列表, 此列表股票需进一步判断
+        self.buy_stock_list = []
+        #每天可买入股票的最大值
+        self.buy_stock_countMax = 5
+        #持有股票列表, 目前持有的股票
+        self.hold_stock_list = []
+        for stock in self.user.position:
+            self.hold_stock_list.append(stock['stock_code'])
+        #持有股票的最大值
+        self.hold_stock_countMax = 10
+        #卖出股票列表, 记录卖出的股票, 此列表中的股票会立即被卖出
+        self.sell_stock_list = []
+        #每天卖出股票的最大值
+        self.sell_stock_countMax = 10
+
         # 通过下面的方式来获取时间戳
         now_dt = self.clock_engine.now_dt
         now = self.clock_engine.now
@@ -33,22 +47,8 @@ class Strategy(StrategyTemplate):
         minute_interval = 0.5
         self.clock_engine.register_interval(minute_interval, trading=False)
 
-        self.source = easyquotation.use('xq')
-        self.shbuying = False
-        self.szbuying = False
         self.ischeckVol = False
         self.updatetime = False
-
-        #买入股票列表
-        self.buy_stock_list = []
-        self.buy_stock_countMax = 2
-        #持有股票列表
-        self.hold_stock_list = []
-        self.hold_stock_countMax = 10
-        #卖出股票列表
-        self.sell_stock_list = []
-        self.sell_stock_countMax = 10
-
 
         self.__backups_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..")) + '/easyquant/config/backups.json'
 
@@ -104,7 +104,6 @@ class Strategy(StrategyTemplate):
 
 
         elif event.event_type == 'all':
-            self.buy_stock_list = []
             if self.updatetime == True:
                 self.update(event.data)
                 self.updatetime = False
@@ -202,9 +201,16 @@ class Strategy(StrategyTemplate):
 
         #加入卖出列表
     def Add_list_sell(self, symbol):
-        if symbol not in self.sell_stock_list:
-            self.sell_stock_list.append(symbol)
-            self.log.info("sell_stock_list: %s" % self.buy_stock_list)
+        if self.sell_stock_countMax > 0:
+            if symbol not in self.sell_stock_list:
+                self.sell_stock_list.append(symbol)
+                self.log.info("sell_stock_list: %s" % self.buy_stock_list)
+            self.user.user.adjust_weight(symbol, 0)
+            self.hold_stock_list.pop(symbol)
+            self.sell_stock_countMax -= 1
+        else:
+            self.log.info("sell_stock_countMax <= 0 : %s" % self.buy_stock_list)
+
 
     def log_handler(self):
         """自定义 log 记录方式"""

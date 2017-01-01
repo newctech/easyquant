@@ -7,9 +7,20 @@ from easyquant import StrategyTemplate
 
 
 class Strategy(StrategyTemplate):
-    name = 'buy_stock'
+    name = 'buyStock'
 
     def init(self):
+        #买入股票列表, 已经买入的股票
+        self.buy_stock_list = []
+        #每天可买入股票的最大值
+        self.buy_stock_countMax = 5
+        #持有股票列表, 目前持有的股票
+        self.hold_stock_list = []
+        for stock in self.user.position:
+            self.hold_stock_list.append(stock['stock_code'])
+        #持有股票的最大值
+        self.hold_stock_countMax = 10
+
         # 通过下面的方式来获取时间戳
         now_dt = self.clock_engine.now_dt
         now = self.clock_engine.now
@@ -40,9 +51,34 @@ class Strategy(StrategyTemplate):
         elif event.event_type == 'general':
             self.log.info('buy_stock_General: %s' % event.data)
 
-
+        elif event.event_type == 'shindex':
+            if event.data['macd'] > 0.1:
+                self.shbuying = True
+            else:
+                self.shbuying = False
+        elif event.event_type == 'szindex':
+            if event.data['macd'] > 0.1:
+                self.szbuying = True
+            else:
+                self.szbuying = False
         elif event.event_type == 'feedback':
-            self.log.info('Buy_stock_Feedback: %s' % event.data)
+            if event.data['name'][:2] == 'ST':
+                pass
+            else:
+                Call_buy(event.data['symbol'])
+
+    def Call_buy(self, symbol):
+        if self.buy_stock_countMax > 0 and symbol not in self.buy_stock_list and \
+                        len(self.hold_stock_list) < self.buy_stock_countMax and symbol not in self.hold_stock_list:
+            self.user.adjust_weight(symbol, 10)
+            self.buy_stock_list.append(symbol)
+            self.buy_stock_countMax -= 1
+            self.hold_stock_list.append(symbol)
+            self.log.info("Buy stock %s : buy_stock_list %s" % (symbol, self.buy_stock_list))
+        else:
+            self.log.info("Not buy : buy_stock_list %s" % self.buy_stock_list)
+
+
 
     def clock(self, event):
         """在交易时间会定时推送 clock 事件
