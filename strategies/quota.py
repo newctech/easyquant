@@ -13,10 +13,10 @@ class Strategy(StrategyTemplate):
     name = 'quota'
 
     def init(self):
-        #买入股票列表, 此列表股票需进一步判断
+        #买入时间前符合条件的股票列表, 并不会按照此列表买入
+        self.try_buy_stock_list = []
+        #买入时间,要买入的股票列表
         self.buy_stock_list = []
-        #每天可买入股票的最大值
-        self.buy_stock_countMax = 5
         #持有股票列表, 目前持有的股票
         self.hold_stock_list = []
         for stock in self.user.position:
@@ -47,7 +47,7 @@ class Strategy(StrategyTemplate):
         minute_interval = 0.5
         self.clock_engine.register_interval(minute_interval, trading=False)
 
-        self.ischeckVol = False
+        self.buying_time = False
         self.updatetime = False
 
         self.__backups_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..")) + '/easyquant/config/backups.json'
@@ -134,15 +134,16 @@ class Strategy(StrategyTemplate):
             self.set_Medium_detail(0)
             self.set_Small_detail(0)
 
-            self.log.info('Detail_Orders_Statistics init')
+            self.log.info('Quota_Open')
         elif event.data.clock_event == 'close':
             # 收市了
-            #self.log.info('StoreData_Close')
-            pass
+            self.log.info('Quota_Close')
 
         elif event.data.clock_event == 'closing':
-            self.ischeckVol = True
+            self.log.info('Buying_Time !!!')
+            self.buying_time = True
         elif event.data.clock_event == 'update':
+            self.log.info('Update_Time !!!')
             self.updatetime = True
 
         elif event.data.clock_event == 1:
@@ -182,18 +183,24 @@ class Strategy(StrategyTemplate):
             pass
         else:
             if self.Check_MACD_Buy(df) and self.Check_KDJ_Buy(df):
-                if self.ischeckVol:
+                if self.buying_time:
                     if self.Check_Vol_Buy(df, 5, 1.2):
                         self.Add_list_buy(symbol)
                 else:
-                    self.Add_list_buy(symbol)
+                    self.Add_list_try_buy(symbol)
+
+        #加入视图买入列表
+    def Add_list_try_buy(self, symbol):
+        if symbol not in self.try_buy_stock_list:
+            self.try_buy_stock_list.append(symbol)
+            self.log.info("Add try stock : %s , try_buy_stock_list: %s" % (symbol, self.try_buy_stock_list))
 
         #加入买入列表
     def Add_list_buy(self, symbol):
         if symbol not in self.buy_stock_list:
             self.buy_stock_list.append(symbol)
             self.feedback_queue.put(symbol)
-            self.log.info("buy_stock_list: %s" % self.buy_stock_list)
+            self.log.info("Add stock : %s , buy_stock_list: %s" % (symbol, self.buy_stock_list))
 
         #卖出策略
     def Calquota_sell(self, symbol, df):
@@ -205,12 +212,12 @@ class Strategy(StrategyTemplate):
         if self.sell_stock_countMax > 0:
             if symbol not in self.sell_stock_list:
                 self.sell_stock_list.append(symbol)
-                self.log.info("sell_stock_list: %s" % self.buy_stock_list)
-            self.user.user.adjust_weight(symbol, 0)
+            self.user.adjust_weight(symbol, 0)
             self.hold_stock_list.pop(symbol)
             self.sell_stock_countMax -= 1
+            self.log.info("Sell stock : %s , sell_stock_list: %s" % (symbol, self.buy_stock_list))
         else:
-            self.log.info("sell_stock_countMax <= 0 : %s" % self.buy_stock_list)
+            self.log.info("Not sell stock : %s , sell_stock_countMax <= 0 : %s" % (symbol, self.buy_stock_list))
 
 
     def log_handler(self):

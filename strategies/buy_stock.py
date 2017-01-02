@@ -63,6 +63,7 @@ class Strategy(StrategyTemplate):
                 self.szbuying = False
         elif event.event_type == 'feedback':
             if event.data['xueqiu_general']['name'][:2] == 'ST':
+                self.log.info("Pass ST stock : %s , buy_stock_list : %s" % (event.data['xueqiu_general']['symbol'], self.buy_stock_list))
                 pass
             else:
                 self.Call_buy_pre(event.data)
@@ -80,9 +81,9 @@ class Strategy(StrategyTemplate):
             self.buy_stock_list.append(symbol)
             self.buy_stock_countMax -= 1
             self.hold_stock_list.append(symbol)
-            self.log.info("Buy stock %s : buy_stock_list %s" % (symbol, self.buy_stock_list))
+            self.log.info("Buy stock : %s , buy_stock_list : %s" % (symbol, self.buy_stock_list))
         else:
-            self.log.info("Not buy %s : buy_stock_list %s" % (symbol, self.buy_stock_list))
+            self.log.info("Not buy stock : %s , buy_stock_list : %s" % (symbol, self.buy_stock_list))
 
 
 
@@ -93,13 +94,14 @@ class Strategy(StrategyTemplate):
         """
         if event.data.clock_event == 'open':
             # 开市了
-            self.log.info('Strategy1_Open')
+            self.log.info('Buy_Stock_Open')
         elif event.data.clock_event == 'close':
             # 收市了
-            self.log.info('Strategy1_Close')
+            self.log.info('Buy_Stock_Close')
         elif event.data.clock_event == 5:
             # 5 分钟的 clock
-            self.log.info("Strategy1_5min")
+            #self.log.info("Strategy1_5min")
+            pass
 
     def log_handler(self):
         """自定义 log 记录方式"""
