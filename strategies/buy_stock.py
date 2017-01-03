@@ -19,7 +19,7 @@ class Strategy(StrategyTemplate):
         for stock in self.user.position:
             self.hold_stock_list.append(stock['stock_code'])
         #持有股票的最大值
-        self.hold_stock_countMax = 10
+        self.hold_stock_countMax = 20
 
         # 通过下面的方式来获取时间戳
         now_dt = self.clock_engine.now_dt
@@ -66,18 +66,21 @@ class Strategy(StrategyTemplate):
                 self.log.info("Pass ST stock : %s , buy_stock_list : %s" % (event.data['xueqiu_general']['symbol'], self.buy_stock_list))
                 pass
             else:
-                self.Call_buy_pre(event.data)
+                if not self.Call_buy_pre(event.data):
+                    self.log.info("Not buy stock : %s , buy_stock_list : %s" % (event.data['xueqiu_general']['symbol'], self.buy_stock_list))
 
     def Call_buy_pre(self, data):
         if data['xueqiu_realtime']['current'] > data['xueqiu_realtime']['avg_price']:
-            if data['mysina_dadan']['totalvolpct'] > 0.25 and \
-                            data['mysina_dadan']['kuvolume'] > data['mysina_dadan']['kdvolume'] * 1.2:
+            if float(data['mysina_dadan']['totalvolpct']) > 0.25 and \
+                            float(data['mysina_dadan']['kuvolume']) > float(data['mysina_dadan']['kdvolume']) * 1.2:
                 self.Call_buy(data['xueqiu_general']['symbol'])
+                return True
+        return False
 
     def Call_buy(self, symbol):
         if self.buy_stock_countMax > 0 and symbol not in self.buy_stock_list and \
                         len(self.hold_stock_list) < self.hold_stock_countMax and symbol not in self.hold_stock_list:
-            self.user.adjust_weight(symbol, 10)
+            self.user.adjust_weight(symbol, 5)
             self.buy_stock_list.append(symbol)
             self.buy_stock_countMax -= 1
             self.hold_stock_list.append(symbol)

@@ -22,11 +22,11 @@ class Strategy(StrategyTemplate):
         for stock in self.user.position:
             self.hold_stock_list.append(stock['stock_code'])
         #持有股票的最大值
-        self.hold_stock_countMax = 10
+        self.hold_stock_countMax = 20
         #卖出股票列表, 记录卖出的股票, 此列表中的股票会立即被卖出
         self.sell_stock_list = []
         #每天卖出股票的最大值
-        self.sell_stock_countMax = 10
+        self.sell_stock_countMax = 20
 
         # 通过下面的方式来获取时间戳
         now_dt = self.clock_engine.now_dt

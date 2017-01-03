@@ -357,11 +357,10 @@ class StrategyTemplate:
             return True
 
     def Check_MACD_Buy(self, df):
-        if self.Is_Down_Going(df['macd'], 4) or self.Is_Down_Going(df['dea'], 1):
-            return False
-        else:
+        if self.Is_Up_Going(df['macd'], 4, True) and self.Is_Up_Going(df['dea'], 1, True):
             if df['macd'][-1] >= 0.02 and df['macd'][-2] <= 0.01:
                 return True
+        return False
 
     def Check_MACD_Sell(self, df):
         if df['macd'][-1] < 0:
@@ -383,20 +382,28 @@ class StrategyTemplate:
                 return True
         return False
 
-    def Is_Up_Going(self, numpy_data, n):
+    def Is_Up_Going(self, numpy_data, n, relax=False):
         if len(numpy_data) < n+1:
             return False
         for i in range(n-1):
-            if numpy_data[-1-i] <= numpy_data[-2-i]:
-                return False
+            if relax == True:
+                if numpy_data[-1-i] < numpy_data[-2-i]:
+                    return False
+            else:
+                if numpy_data[-1-i] <= numpy_data[-2-i]:
+                    return False
         return True
 
-    def Is_Down_Going(self, numpy_data, n):
+    def Is_Down_Going(self, numpy_data, n, relax=False):
         if len(numpy_data) < n+1:
             return False
-        for i in range(n):
-            if numpy_data[-1-i] >= numpy_data[-2-i]:
-                return False
+        for i in range(n-1):
+            if relax == True:
+                if numpy_data[-1-i] > numpy_data[-2-i]:
+                    return False
+            else:
+                if numpy_data[-1-i] >= numpy_data[-2-i]:
+                    return False
         return True
 
     def log_handler(self):

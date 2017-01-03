@@ -20,7 +20,7 @@ class XueqiuFeedbackEngine(BaseEngine):
         res_dict = {}
         res_dict['xueqiu_general'] = self.source_xq.get_general_data(self.stocks)[-1]
         res_dict['xueqiu_realtime'] = self.source_xq.get_realtime_data(self.stocks)[-1]
-        res_dict['mysina_dadan'] = self.source_mysina.get_dadan_data(self.stocks, volume='40000')
+        res_dict['mysina_dadan'] = self.source_mysina.get_dadan_data(self.stocks, volume='40000')[-1]
         return res_dict
 
     def push_quotation(self):
