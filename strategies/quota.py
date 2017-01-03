@@ -159,12 +159,13 @@ class Strategy(StrategyTemplate):
 
         #数据计算
     def Caldata(self, symbol, stock):
-        basedf = self.kdata_read_hdf5(symbol)[-30:]
+        basedf = self.kdata_read_hdf5(symbol)[-40:]
         stock.pop('time')
         timestamp = pd.Timestamp('1970-01-01')
         series = pd.DataFrame(stock, index=[timestamp])
         dfdata = basedf.append(series)
         dfdatavol = self.Get_Volume_MA(dfdata, 5)
+        dfdatavol = self.Get_Volume_MA(dfdatavol, 30)
         df = self.KDJ_CN(dfdatavol, 9, 3, 3)
         return df
 
@@ -184,7 +185,7 @@ class Strategy(StrategyTemplate):
         else:
             if self.Check_MACD_Buy(df) and self.Check_KDJ_Buy(df):
                 if self.buying_time:
-                    if self.Check_Vol_Buy(df, 5, 1.2):
+                    if self.Check_Vol_Buy(df, 5, 1.25) and self.Check_Vol_Buy(df, 30, 1):
                         self.Add_list_buy(symbol)
                 else:
                     self.Add_list_try_buy(symbol)
