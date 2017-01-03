@@ -173,6 +173,8 @@ class Strategy(StrategyTemplate):
     def Calquota_base(self, symbol, stock):
         if symbol in self.hold_stock_list:
             return 'Calquota_sell'
+        if stock['close'] > stock['ma5'] * 1.2 or stock['close'] > stock['ma10'] * 1.2:
+            return None
         if stock['macd'] > 0 and stock['ma5'] > stock['ma10'] and \
                         stock['close'] > stock['open'] + (stock['high'] - stock['open']) * 0.7:
             return 'Calquota_buy'
@@ -181,14 +183,19 @@ class Strategy(StrategyTemplate):
         #买入策略
     def Calquota_buy(self, symbol, df):
         if self.Is_Down_Going(df['ma10'], 3):
-            pass
+            return False
         else:
+            #排除空头排列
+            if self.Is_Down_Going(df['ma20'], 6) and self.Is_Down_Going(df['ma30'], 6):
+                return False
             if self.Check_MACD_Buy(df) and self.Check_KDJ_Buy(df):
                 if self.buying_time:
                     if self.Check_Vol_Buy(df, 5, 1.25) and self.Check_Vol_Buy(df, 30, 1):
                         self.Add_list_buy(symbol)
                 else:
                     self.Add_list_try_buy(symbol)
+                return True
+            return False
 
         #加入视图买入列表
     def Add_list_try_buy(self, symbol):
