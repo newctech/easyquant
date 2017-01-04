@@ -144,6 +144,7 @@ class Strategy(StrategyTemplate):
             self.log.info('Quota_Open')
         elif event.data.clock_event == 'close':
             # 收市了
+            self.buying_time = False
             self.log.info('Quota_Close')
 
         elif event.data.clock_event == 'closing':
