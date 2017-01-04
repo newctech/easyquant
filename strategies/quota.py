@@ -28,6 +28,9 @@ class Strategy(StrategyTemplate):
         #每天卖出股票的最大值
         self.sell_stock_countMax = 20
 
+        #股票黑名单
+        self.blacklist = []
+
         # 通过下面的方式来获取时间戳
         now_dt = self.clock_engine.now_dt
         now = self.clock_engine.now
@@ -106,21 +109,25 @@ class Strategy(StrategyTemplate):
         elif event.event_type == 'all':
             if self.updatetime == True:
                 self.update(event.data)
-                self.updatetime = False
             for stock_data in event.data:
                 symbol = stock_data['stock']['symbol']
                 stock = stock_data['chartlist']
                 if len(stock) == 0:
                     continue
-                cal_quota = self.Calquota_base(symbol, stock[-1])
-                if cal_quota == None:
+                if symbol in self.blacklist:
                     continue
-                elif cal_quota == 'Calquota_buy':
-                    df = self.Caldata(symbol, stock[-1])
-                    self.Calquota_buy(symbol, df)
-                elif cal_quota == 'Calquota_sell':
-                    df = self.Caldata(symbol, stock[-1])
-                    self.Calquota_sell(symbol, df)
+                try:
+                    cal_quota = self.Calquota_base(symbol, stock[-1])
+                    if cal_quota == None:
+                        continue
+                    elif cal_quota == 'Calquota_buy':
+                        df = self.Caldata(symbol, stock[-1])
+                        self.Calquota_buy(symbol, df)
+                    elif cal_quota == 'Calquota_sell':
+                        df = self.Caldata(symbol, stock[-1])
+                        self.Calquota_sell(symbol, df)
+                except KeyError:
+                    continue
 
     def clock(self, event):
         """在交易时间会定时推送 clock 事件
@@ -152,6 +159,7 @@ class Strategy(StrategyTemplate):
             pass
 
     def update(self, stocks):
+        self.updatetime = False
         for stock in stocks:
             symbol_key = stock['stock']['symbol']
             for data in stock['chartlist']:
