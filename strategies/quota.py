@@ -37,20 +37,21 @@ class Strategy(StrategyTemplate):
         now = time.time()
 
         # 注册时钟事件
-        clock_type = "closing" #尾盘
+        clock_type = "buying" #尾盘
         moment = dt.time(14, 55, 00, tzinfo=tz.tzlocal())
-        self.clock_engine.register_moment(clock_type, moment)
+        self.clock_engine.register_moment(clock_type, moment, makeup=True)
 
         # 注册时钟事件
         clock_type = "update" #存储K线数据
         moment = dt.time(15, 15, 0, tzinfo=tz.tzlocal())
-        self.clock_engine.register_moment(clock_type, moment)
+        self.clock_engine.register_moment(clock_type, moment, makeup=False)
 
         # 注册时钟间隔事件, 不在交易阶段也会触发, clock_type == minute_interval
         minute_interval = 0.5
         self.clock_engine.register_interval(minute_interval, trading=False)
 
         self.buying_time = False
+        self.selling_time = False
         self.updatetime = False
 
         self.__backups_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..")) + '/easyquant/config/backups.json'
@@ -141,18 +142,19 @@ class Strategy(StrategyTemplate):
             self.set_Medium_detail(0)
             self.set_Small_detail(0)
 
+            self.selling_time = True
             self.log.info('Quota_Open')
         elif event.data.clock_event == 'close':
             # 收市了
             self.buying_time = False
+            self.selling_time = False
             self.log.info('Quota_Close')
-
-        elif event.data.clock_event == 'closing':
-            self.log.info('Buying_Time !!!')
+        elif event.data.clock_event == 'buying':
             self.buying_time = True
+            self.log.info('Buying_Time !!!')
         elif event.data.clock_event == 'update':
-            self.log.info('Update_Time !!!')
             self.updatetime = True
+            self.log.info('Update_Time !!!')
 
         elif event.data.clock_event == 1:
             # 1 分钟的 clock
@@ -221,8 +223,11 @@ class Strategy(StrategyTemplate):
 
         #卖出策略
     def Calquota_sell(self, symbol, df):
-        if self.Check_MACD_Sell(df) or self.Check_KDJ_Sell(df):
-            Add_list_sell(symbol)
+        if self.selling_time:
+            if self.Check_MACD_Sell(df) or self.Check_KDJ_Sell(df):
+                self.Add_list_sell(symbol)
+        else:
+            pass
 
         #加入卖出列表
     def Add_list_sell(self, symbol):
@@ -230,11 +235,11 @@ class Strategy(StrategyTemplate):
             if symbol not in self.sell_stock_list:
                 self.sell_stock_list.append(symbol)
             self.user.adjust_weight(symbol, 0)
-            self.hold_stock_list.pop(symbol)
+            self.hold_stock_list.remove(symbol)
             self.sell_stock_countMax -= 1
             self.log.info("Sell stock : %s , sell_stock_list: %s" % (symbol, self.buy_stock_list))
         else:
-            self.log.info("Not sell stock : %s , sell_stock_countMax <= 0 : %s" % (symbol, self.buy_stock_list))
+            self.log.info("Not sell stock for countMax : %s , sell_stock_countMax <= 0 : %s" % (symbol, self.buy_stock_list))
 
 
     def log_handler(self):

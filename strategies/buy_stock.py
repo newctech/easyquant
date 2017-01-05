@@ -26,11 +26,6 @@ class Strategy(StrategyTemplate):
         now = self.clock_engine.now
         now = time.time()
 
-        # 注册时钟事件
-        clock_type = "closing" #尾盘
-        moment = dt.time(14, 56, 30, tzinfo=tz.tzlocal())
-        self.clock_engine.register_moment(clock_type, moment)
-
         # 注册时钟间隔事件, 不在交易阶段也会触发, clock_type == minute_interval
         minute_interval = 1.5
         self.clock_engine.register_interval(minute_interval, trading=False)
@@ -67,14 +62,15 @@ class Strategy(StrategyTemplate):
                 pass
             else:
                 if not self.Call_buy_pre(event.data):
-                    self.log.info("Not buy stock : %s , buy_stock_list : %s" % (event.data['xueqiu_general']['symbol'], self.buy_stock_list))
+                    self.log.info("Not buy stock for feedback : %s , buy_stock_list : %s" % (event.data['xueqiu_general']['symbol'], self.buy_stock_list))
 
     def Call_buy_pre(self, data):
         if data['xueqiu_realtime']['current'] > data['xueqiu_realtime']['avg_price']:
             if float(data['mysina_dadan']['totalvolpct']) > 0.25 and \
                             float(data['mysina_dadan']['kuvolume']) > float(data['mysina_dadan']['kdvolume']) * 1.2:
-                self.Call_buy(data['xueqiu_general']['symbol'])
-                return True
+                if float(data['xueqiu_general']['current']) < float(data['xueqiu_general']['rise_stop']):
+                    self.Call_buy(data['xueqiu_general']['symbol'])
+                    return True
         return False
 
     def Call_buy(self, symbol):
@@ -86,7 +82,7 @@ class Strategy(StrategyTemplate):
             self.hold_stock_list.append(symbol)
             self.log.info("Buy stock : %s , buy_stock_list : %s" % (symbol, self.buy_stock_list))
         else:
-            self.log.info("Not buy stock : %s , buy_stock_list : %s" % (symbol, self.buy_stock_list))
+            self.log.info("Not buy stock for countMax or hold: %s , buy_stock_list : %s" % (symbol, self.buy_stock_list))
 
 
 
