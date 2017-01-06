@@ -224,8 +224,12 @@ class Strategy(StrategyTemplate):
         #卖出策略
     def Calquota_sell(self, symbol, df):
         if self.selling_time:
-            if self.Check_MACD_Sell(df) or self.Check_KDJ_Sell(df):
+            if self.Check_MACD_Sell(df):
                 self.Add_list_sell(symbol)
+                self.log.info("Sell stock for MACD : %s , sell_stock_list: %s" % (symbol, self.buy_stock_list))
+            if self.Check_KDJ_Sell(df):
+                self.Add_list_sell(symbol)
+                self.log.info("Sell stock for KDJ : %s , sell_stock_list: %s" % (symbol, self.buy_stock_list))
         else:
             pass
 
@@ -237,7 +241,6 @@ class Strategy(StrategyTemplate):
             self.user.adjust_weight(symbol, 0)
             self.hold_stock_list.remove(symbol)
             self.sell_stock_countMax -= 1
-            self.log.info("Sell stock : %s , sell_stock_list: %s" % (symbol, self.buy_stock_list))
         else:
             self.log.info("Not sell stock for countMax : %s , sell_stock_countMax <= 0 : %s" % (symbol, self.buy_stock_list))
 

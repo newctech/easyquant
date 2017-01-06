@@ -61,8 +61,7 @@ class Strategy(StrategyTemplate):
                 self.log.info("Pass ST stock : %s , buy_stock_list : %s" % (event.data['xueqiu_general']['symbol'], self.buy_stock_list))
                 pass
             else:
-                if not self.Call_buy_pre(event.data):
-                    self.log.info("Not buy stock for feedback : %s , buy_stock_list : %s" % (event.data['xueqiu_general']['symbol'], self.buy_stock_list))
+                self.Call_buy_pre(event.data)
 
     def Call_buy_pre(self, data):
         if data['xueqiu_realtime']['current'] > data['xueqiu_realtime']['avg_price']:
@@ -71,6 +70,12 @@ class Strategy(StrategyTemplate):
                 if float(data['xueqiu_general']['current']) < float(data['xueqiu_general']['rise_stop']):
                     self.Call_buy(data['xueqiu_general']['symbol'])
                     return True
+                else:
+                    self.log.info("Not buy stock for rise_stop : %s , buy_stock_list : %s" % (data['xueqiu_general']['symbol'], self.buy_stock_list))
+            else:
+                self.log.info("Not buy stock for mysina_dadan : %s , buy_stock_list : %s" % (data['xueqiu_general']['symbol'], self.buy_stock_list))
+        else:
+            self.log.info("Not buy stock for avg_price : %s , buy_stock_list : %s" % (data['xueqiu_general']['symbol'], self.buy_stock_list))
         return False
 
     def Call_buy(self, symbol):
