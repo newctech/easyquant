@@ -358,7 +358,7 @@ class StrategyTemplate:
 
     def Check_MACD_Buy(self, df):
         if self.Is_Up_Going(df['macd'], 4, True) and self.Is_Up_Going(df['dea'], 1, True):
-            if df['macd'][-1] >= 0.02 and df['macd'][-2] <= 0.01:
+            if df['macd'][-1] >= 0.02 and df['macd'][-2] <= 0.01 and df['dif'][-1] >= 0.04:
                 return True
         return False
 
