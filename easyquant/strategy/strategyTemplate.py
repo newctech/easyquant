@@ -353,7 +353,7 @@ class StrategyTemplate:
                 return True
 
     def Check_KDJ_Sell(self, df):
-        if self.Is_Down_Going(df['J'], 3):
+        if self.Is_Down_Going(df['J'], 4):
             return True
 
     def Check_MACD_Buy(self, df):
