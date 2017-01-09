@@ -65,8 +65,7 @@ class Strategy(StrategyTemplate):
 
     def Call_buy_pre(self, data):
         if data['xueqiu_realtime']['current'] > data['xueqiu_realtime']['avg_price']:
-            if float(data['mysina_dadan']['totalvolpct']) > 0.25 and \
-                            float(data['mysina_dadan']['kuvolume']) > float(data['mysina_dadan']['kdvolume']) * 1.2:
+            if float(data['mysina_dadan']['kuvolume']) > float(data['mysina_dadan']['kdvolume']) * 1.2:
                 if float(data['xueqiu_general']['current']) < float(data['xueqiu_general']['rise_stop']):
                     self.Call_buy(data['xueqiu_general']['symbol'])
                     return True
