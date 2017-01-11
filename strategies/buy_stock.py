@@ -1,4 +1,4 @@
-# coding:utf-8
+# -*- coding: utf-8 -*-
 import time
 import datetime as dt
 from dateutil import tz
@@ -19,7 +19,7 @@ class Strategy(StrategyTemplate):
         for stock in self.user.position:
             self.hold_stock_list.append(stock['stock_code'])
         #持有股票的最大值
-        self.hold_stock_countMax = 20
+        self.hold_stock_countMax = 10
 
         # 通过下面的方式来获取时间戳
         now_dt = self.clock_engine.now_dt
@@ -80,7 +80,7 @@ class Strategy(StrategyTemplate):
     def Call_buy(self, symbol):
         if self.buy_stock_countMax > 0 and symbol not in self.buy_stock_list and \
                         len(self.hold_stock_list) < self.hold_stock_countMax and symbol not in self.hold_stock_list:
-            self.user.adjust_weight(symbol, 5)
+            self.user.adjust_weight(symbol, 10)
             self.buy_stock_list.append(symbol)
             self.buy_stock_countMax -= 1
             self.hold_stock_list.append(symbol)

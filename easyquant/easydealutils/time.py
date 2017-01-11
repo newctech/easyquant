@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import datetime
 import doctest
 from functools import lru_cache

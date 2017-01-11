@@ -1,4 +1,4 @@
-# coding: utf-8
+# -*- coding: utf-8 -*-
 import datetime
 from collections import deque
 from threading import Thread

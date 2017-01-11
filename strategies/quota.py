@@ -1,4 +1,4 @@
-# coding:utf-8
+# -*- coding: utf-8 -*-
 import os
 import time
 import datetime as dt
@@ -22,11 +22,11 @@ class Strategy(StrategyTemplate):
         for stock in self.user.position:
             self.hold_stock_list.append(stock['stock_code'])
         #持有股票的最大值
-        self.hold_stock_countMax = 20
+        self.hold_stock_countMax = 10
         #卖出股票列表, 记录卖出的股票, 此列表中的股票会立即被卖出
         self.sell_stock_list = []
         #每天卖出股票的最大值
-        self.sell_stock_countMax = 20
+        self.sell_stock_countMax = 10
 
         #股票黑名单
         self.blacklist = []
