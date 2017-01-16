@@ -144,17 +144,20 @@ class Strategy(StrategyTemplate):
 
             self.selling_time = True
             self.log.info('Quota_Open')
+            self.log.info('Selling_Time Start !!!')
         elif event.data.clock_event == 'close':
             # 收市了
             self.buying_time = False
             self.selling_time = False
+            self.log.info('Buying_Time End !!!')
+            self.log.info('Selling_Time End !!!')
             self.log.info('Quota_Close')
         elif event.data.clock_event == 'buying':
             self.buying_time = True
-            self.log.info('Buying_Time !!!')
+            self.log.info('Buying_Time Start !!!')
         elif event.data.clock_event == 'update':
             self.updatetime = True
-            self.log.info('Update_Time !!!')
+            self.log.info('Update_Time Start !!!')
 
         elif event.data.clock_event == 1:
             # 1 分钟的 clock
@@ -167,6 +170,7 @@ class Strategy(StrategyTemplate):
             symbol_key = stock['stock']['symbol']
             for data in stock['chartlist']:
                 self.kdata_write_hdf5(data, symbol_key)
+        self.log.info('Update_Time End !!!')
 
         #数据计算
     def Caldata(self, symbol, stock):

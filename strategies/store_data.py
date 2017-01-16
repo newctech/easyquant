@@ -45,7 +45,10 @@ class Strategy(StrategyTemplate):
         #    for stock in event.data:
         #        symbol_key = stock['stock']['symbol']
         #        for data in stock['chartlist']:
-        #            self.kdata_write_hdf5(data, symbol_key)
+        #            try:
+        #                self.kdata_write_hdf5(data, symbol_key)
+        #             except KeyError:
+        #                 continue
             self.log.info('StoreData_all: %d' % len(event.data))
 
     def clock(self, event):
