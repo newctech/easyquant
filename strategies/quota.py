@@ -128,6 +128,7 @@ class Strategy(StrategyTemplate):
                         df = self.Caldata(symbol, stock[-1])
                         self.Calquota_sell(symbol, df)
                 except KeyError:
+                    self.log.info("Add %s to blacklist : %s" % (symbol, self.blacklist))
                     continue
 
     def clock(self, event):
